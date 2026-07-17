@@ -1,0 +1,18 @@
+import { Sidebar } from './Sidebar';
+import { Topbar } from './Topbar';
+import { MobileBottomNav } from './MobileBottomNav';
+import { FeedbackButton } from '@/components/beta/FeedbackButton';
+
+export function StudentLayout({ children, title, noPad }: { children: React.ReactNode; title: string; noPad?: boolean }) {
+  return (
+    <div className="app-layout">
+      <Sidebar />
+      <div className="app-main">
+        <Topbar title={title} />
+        <main className={noPad ? 'app-content-noPad' : 'app-content'}>{children}</main>
+      </div>
+      <MobileBottomNav />
+      <FeedbackButton />
+    </div>
+  );
+}

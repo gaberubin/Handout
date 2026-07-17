@@ -1,0 +1,11 @@
+-- ⚠️  THIS FILE IS OUTDATED AND NO LONGER THE SOURCE OF TRUTH.
+--
+-- Use db/schema.sql instead — it is the canonical, up-to-date schema.
+--
+-- To set up or reset the database:
+--   1. Run db/schema.sql  in Supabase → SQL Editor
+--   2. Run db/storage-setup.sql
+--   3. Run db/make-admin.sql  (update the email first)
+--   4. Run db/notifications-triggers.sql
+--   5. Run db/public-read-policies.sql
+--   6. Run db/admin-and-delete-policies.sql

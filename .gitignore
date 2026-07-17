@@ -1,0 +1,57 @@
+# ─── DEPENDENCIES ───
+node_modules/
+.pnp
+.pnp.js
+
+# ─── ENV & SECRETS — CRITICAL ───
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+*.key
+*.pem
+secrets/
+
+# ─── NEXT.JS ───
+.next/
+out/
+build/
+dist/
+
+# ─── VERCEL ───
+.vercel
+
+# ─── DEBUG ───
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ─── EDITOR ───
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# ─── OS ───
+Thumbs.db
+desktop.ini
+
+# ─── TYPESCRIPT ───
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── TESTING ───
+coverage/
+.nyc_output
+
+# ─── MISC ───
+*.log
+.cache/
+
+.auth/
+test-results/
+playwright-report/

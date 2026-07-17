@@ -1,0 +1,83 @@
+// Countries with ISO code + international dial code, and US states.
+// Edit/extend freely. (City & ZIP are free-text + validated; for full
+// city/ZIP autocomplete wire a places API later.)
+
+export type Country = { name: string; code: string; dial: string };
+
+export const COUNTRIES: Country[] = [
+  { name: 'United States', code: 'US', dial: '+1' },
+  { name: 'India', code: 'IN', dial: '+91' },
+  { name: 'Canada', code: 'CA', dial: '+1' },
+  { name: 'United Kingdom', code: 'GB', dial: '+44' },
+  { name: 'Australia', code: 'AU', dial: '+61' },
+  { name: 'China', code: 'CN', dial: '+86' },
+  { name: 'Nigeria', code: 'NG', dial: '+234' },
+  { name: 'Pakistan', code: 'PK', dial: '+92' },
+  { name: 'Bangladesh', code: 'BD', dial: '+880' },
+  { name: 'Nepal', code: 'NP', dial: '+977' },
+  { name: 'Sri Lanka', code: 'LK', dial: '+94' },
+  { name: 'Germany', code: 'DE', dial: '+49' },
+  { name: 'France', code: 'FR', dial: '+33' },
+  { name: 'Spain', code: 'ES', dial: '+34' },
+  { name: 'Italy', code: 'IT', dial: '+39' },
+  { name: 'Brazil', code: 'BR', dial: '+55' },
+  { name: 'Mexico', code: 'MX', dial: '+52' },
+  { name: 'Japan', code: 'JP', dial: '+81' },
+  { name: 'South Korea', code: 'KR', dial: '+82' },
+  { name: 'Vietnam', code: 'VN', dial: '+84' },
+  { name: 'Philippines', code: 'PH', dial: '+63' },
+  { name: 'Indonesia', code: 'ID', dial: '+62' },
+  { name: 'Malaysia', code: 'MY', dial: '+60' },
+  { name: 'Singapore', code: 'SG', dial: '+65' },
+  { name: 'Thailand', code: 'TH', dial: '+66' },
+  { name: 'Saudi Arabia', code: 'SA', dial: '+966' },
+  { name: 'United Arab Emirates', code: 'AE', dial: '+971' },
+  { name: 'Qatar', code: 'QA', dial: '+974' },
+  { name: 'Kuwait', code: 'KW', dial: '+965' },
+  { name: 'Turkey', code: 'TR', dial: '+90' },
+  { name: 'Egypt', code: 'EG', dial: '+20' },
+  { name: 'Kenya', code: 'KE', dial: '+254' },
+  { name: 'Ghana', code: 'GH', dial: '+233' },
+  { name: 'South Africa', code: 'ZA', dial: '+27' },
+  { name: 'Ethiopia', code: 'ET', dial: '+251' },
+  { name: 'Ireland', code: 'IE', dial: '+353' },
+  { name: 'Netherlands', code: 'NL', dial: '+31' },
+  { name: 'Belgium', code: 'BE', dial: '+32' },
+  { name: 'Sweden', code: 'SE', dial: '+46' },
+  { name: 'Norway', code: 'NO', dial: '+47' },
+  { name: 'Denmark', code: 'DK', dial: '+45' },
+  { name: 'Finland', code: 'FI', dial: '+358' },
+  { name: 'Switzerland', code: 'CH', dial: '+41' },
+  { name: 'Austria', code: 'AT', dial: '+43' },
+  { name: 'Poland', code: 'PL', dial: '+48' },
+  { name: 'Portugal', code: 'PT', dial: '+351' },
+  { name: 'Greece', code: 'GR', dial: '+30' },
+  { name: 'Russia', code: 'RU', dial: '+7' },
+  { name: 'Ukraine', code: 'UA', dial: '+380' },
+  { name: 'Israel', code: 'IL', dial: '+972' },
+  { name: 'Iran', code: 'IR', dial: '+98' },
+  { name: 'Iraq', code: 'IQ', dial: '+964' },
+  { name: 'Colombia', code: 'CO', dial: '+57' },
+  { name: 'Argentina', code: 'AR', dial: '+54' },
+  { name: 'Chile', code: 'CL', dial: '+56' },
+  { name: 'Peru', code: 'PE', dial: '+51' },
+  { name: 'New Zealand', code: 'NZ', dial: '+64' },
+  { name: 'Hong Kong', code: 'HK', dial: '+852' },
+  { name: 'Taiwan', code: 'TW', dial: '+886' },
+  { name: 'Morocco', code: 'MA', dial: '+212' },
+  { name: 'Other', code: 'XX', dial: '+' },
+];
+
+export const US_STATES: string[] = [
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
+  'Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky',
+  'Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi',
+  'Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico',
+  'New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania',
+  'Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+  'Virginia','Washington','West Virginia','Wisconsin','Wyoming','District of Columbia',
+];
+
+export function dialFor(countryName: string): string {
+  return COUNTRIES.find(c => c.name === countryName)?.dial || '+';
+}
