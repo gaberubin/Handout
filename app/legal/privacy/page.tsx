@@ -62,9 +62,9 @@ export default function PrivacyPage() {
           <Bullet><Strong>Access:</Strong> view all data we have on you (Settings → Privacy)</Bullet>
           <Bullet><Strong>Correct:</Strong> update any personal info anytime from Settings</Bullet>
           <Bullet><Strong>Delete:</Strong> delete your account from Settings — most data deleted within 30 days</Bullet>
-          <Bullet><Strong>Export:</Strong> download your data in JSON format (email support@handout.app)</Bullet>
+          <Bullet><Strong>Export:</Strong> download your data in JSON format (email handout.corp@gmail.com)</Bullet>
           <Bullet><Strong>Opt out:</Strong> unsubscribe from marketing emails via the link in any email</Bullet>
-          <P>Residents of California (CCPA) and EU (GDPR) have additional rights — email privacy@handout.app to exercise them.</P>
+          <P>Residents of California (CCPA) and EU (GDPR) have additional rights — email handout.corp@gmail.com to exercise them.</P>
         </Section>
 
         <Section title="6. Data Security">
@@ -91,9 +91,9 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="10. Contact">
-          <Bullet>Privacy questions: privacy@handout.app</Bullet>
-          <Bullet>Data requests: privacy@handout.app</Bullet>
-          <Bullet>General support: support@handout.app</Bullet>
+          <Bullet>Privacy questions: handout.corp@gmail.com</Bullet>
+          <Bullet>Data requests: handout.corp@gmail.com</Bullet>
+          <Bullet>General support: handout.corp@gmail.com</Bullet>
         </Section>
 
         <div style={{ marginTop:64, paddingTop:32, borderTop:'1px solid var(--border)', fontSize:13, color:'var(--muted)', textAlign:'center' }}>
