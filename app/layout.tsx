@@ -21,10 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-pattern">
         <Providers>
+          {children}
           <Analytics />
         </Providers>
-
-        <Analytics />
       </body>
     </html>
   );
