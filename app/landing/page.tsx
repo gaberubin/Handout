@@ -422,7 +422,7 @@ export default function LandingPage() {
           <BetaBadge compact />
           {[{ l:'Terms', h:'/legal/terms' },{ l:'Privacy', h:'/legal/privacy' },{ l:'Safety', h:'/legal/safety' },{ l:'Contact', h:'/contact' }].map(x=><Link key={x.l} href={x.h} style={{ fontSize:13, color:'var(--muted)', transition:'color 0.2s', textDecoration:'none' }}>{x.l}</Link>)}
         </div>
-        <span style={{ fontSize:13, color:'var(--muted)' }}>@handoutapp · handout.app</span>
+        <a href="mailto:handout.corp@gmail.com" style={{ fontSize:13, color:'var(--muted)', textDecoration:'none' }}>handout.corp@gmail.com</a>
       </footer>
 
     </div>
