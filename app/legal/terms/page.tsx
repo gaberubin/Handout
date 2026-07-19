@@ -118,7 +118,7 @@ export default function TermsPage() {
           <Bullet><Strong>You are 18 years of age or older.</Strong></Bullet>
           <Bullet>Handout does not conduct background checks and does not verify any user's identity, age, character, or intentions.</Bullet>
           <Bullet>Meet matches in public places, tell a friend where you're going, and trust your instincts.</Bullet>
-          <Bullet>You may block or report any user. Report unsafe behavior to safety@handout.app; in emergencies, contact local authorities first.</Bullet>
+          <Bullet>You may block or report any user. Report unsafe behavior to handout.corp@gmail.com; in emergencies, contact local authorities first.</Bullet>
           <Bullet>Handout is not responsible for the conduct of any match, online or in person.</Bullet>
         </Section>
 
@@ -133,7 +133,7 @@ export default function TermsPage() {
           <Bullet>Use common sense when meeting strangers</Bullet>
           <Bullet>Meet in public places initially, whether for roommates, Marketplace exchanges, or Campus Connect</Bullet>
           <Bullet>Trust your instincts — leave if something feels wrong</Bullet>
-          <Bullet>Report unsafe behavior, scams, or policy violations to safety@handout.app</Bullet>
+          <Bullet>Report unsafe behavior, scams, or policy violations to handout.corp@gmail.com</Bullet>
           <Bullet>In emergencies, contact local authorities (911 in the US) before contacting us</Bullet>
         </Section>
 
@@ -185,7 +185,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="20. Dispute Resolution">
-          <P>Disputes should first be raised by emailing support@handout.app. We will attempt to resolve in good faith within 30 days.</P>
+          <P>Disputes should first be raised by emailing handout.corp@gmail.com. We will attempt to resolve in good faith within 30 days.</P>
           <P>If unresolved, disputes shall be governed by the laws of the State of New Jersey, USA, and resolved exclusively in the state or federal courts located in Gloucester County, New Jersey.</P>
           <P>You waive any right to a jury trial or to participate in a class action.</P>
         </Section>
@@ -196,9 +196,9 @@ export default function TermsPage() {
 
         <Section title="22. Contact">
           <P>Questions about these Terms? Reach us at:</P>
-          <Bullet>General: support@handout.app</Bullet>
-          <Bullet>Safety concerns: safety@handout.app</Bullet>
-          <Bullet>Legal notices: legal@handout.app</Bullet>
+          <Bullet>General: handout.corp@gmail.com</Bullet>
+          <Bullet>Safety concerns: handout.corp@gmail.com</Bullet>
+          <Bullet>Legal notices: handout.corp@gmail.com</Bullet>
         </Section>
 
         <div style={{ marginTop:64, paddingTop:32, borderTop:'1px solid var(--border)', fontSize:13, color:'var(--muted)', textAlign:'center' }}>
