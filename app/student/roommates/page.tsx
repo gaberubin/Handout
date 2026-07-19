@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { StudentLayout } from '@/components/layout/StudentLayout';
 import { validateText, validateParagraph, validatePrice, validateIntlPhone } from '@/lib/validation';
+import { processPickedFiles } from '@/lib/imageCompress';
+
+const MAX_PHOTOS = 7;
+type Media = { url: string; type: string };
 
 const PinIcon  = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
 const CalIcon  = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
@@ -65,6 +69,10 @@ export default function RoommatesPage() {
   const [fDiet, setFDiet]     = useState('No preference');
   const [fSmoke, setFSmoke]   = useState('No preference');
   const [fPets, setFPets]     = useState('No preference');
+  // form — house photos (up to 7)
+  const [photos, setPhotos]   = useState<Media[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [photoErr, setPhotoErr] = useState('');
   const [saving, setSaving] = useState(false);
   const [formErr, setFormErr] = useState('');
   const [fieldErrs, setFieldErrs] = useState<Record<string, string>>({});
@@ -109,9 +117,36 @@ export default function RoommatesPage() {
       setFRoom(prefill.room_type || ''); setFOcc(prefill.occupancy || ''); setFPhone(prefill.contact_phone || '');
       setFGender(prefill.gender_preference || 'Any'); setFDiet(prefill.diet || 'No preference');
       setFSmoke(prefill.smoking || 'No preference'); setFPets(prefill.pets || 'No preference');
+      setPhotos(Array.isArray(prefill.media) ? prefill.media : []);
+    } else {
+      setPhotos([]);
     }
+    setPhotoErr('');
     setShowModal(true);
   }
+
+  async function pickPhotos(list: FileList | null) {
+    if (!me) return;
+    setPhotoErr('');
+    const { files, error } = await processPickedFiles(list);
+    const images = files.filter(f => f.type.startsWith('image/'));
+    if (error) setPhotoErr(error);
+    const room = MAX_PHOTOS - photos.length;
+    if (room <= 0) { setPhotoErr(`You can add up to ${MAX_PHOTOS} photos.`); return; }
+    const take = images.slice(0, room);
+    if (images.length > room) setPhotoErr(`Only ${MAX_PHOTOS} photos allowed — extra photos were skipped.`);
+    setUploading(true);
+    const sb = createClient();
+    const added: Media[] = [];
+    for (const f of take) {
+      const path = `${me.id}/roommate/${Date.now()}-${f.name.replace(/[^\w.\-]/g, '_')}`;
+      const { error: upErr } = await sb.storage.from('listing-media').upload(path, f);
+      if (!upErr) added.push({ url: sb.storage.from('listing-media').getPublicUrl(path).data.publicUrl, type: 'image' });
+    }
+    setPhotos(p => [...p, ...added]);
+    setUploading(false);
+  }
+  function removePhoto(i: number) { setPhotos(p => p.filter((_, idx) => idx !== i)); }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -139,6 +174,7 @@ export default function RoommatesPage() {
       occupancy: hasRoom ? (fOcc || null) : null,
       contact_phone: hasRoom ? (fPhone || null) : null,
       gender_preference: fGender, diet: fDiet, smoking: fSmoke, pets: fPets,
+      media: hasRoom ? photos : [],
       university: myUni || null, is_active: true,
     });
     setSaving(false);
@@ -189,8 +225,17 @@ export default function RoommatesPage() {
         <div className="stagger-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(285px,1fr))', gap: 16 }}>
           {visible.map((l, i) => {
             const pct = match(myListing || me || {}, l);
+            const cover = Array.isArray(l.media) ? l.media.find((m: any) => m?.type === 'image')?.url : null;
             return (
               <div key={l.id} className="ft-card" style={{ padding: 18 }}>
+                {cover && (
+                  <div style={{ margin: '-18px -18px 14px', height: 150, background: '#E7F1EA', position: 'relative', overflow: 'hidden', borderRadius: '18px 18px 0 0' }}>
+                    <img src={cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {l.media.filter((m: any) => m?.type === 'image').length > 1 && (
+                      <span style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 10.5, fontWeight: 700, color: '#fff', background: 'rgba(18,36,28,0.6)', borderRadius: 100, padding: '3px 9px' }}>📷 {l.media.filter((m: any) => m?.type === 'image').length}</span>
+                    )}
+                  </div>
+                )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 14 }}>
                   <div style={{ width: 44, height: 44, borderRadius: 50, background: COLORS[i % COLORS.length], color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{ini(names[l.user_id] || '')}</div>
                   <div style={{ flex: 1 }}>
@@ -270,6 +315,26 @@ export default function RoommatesPage() {
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4c6157', marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.4 }}>Contact phone <span style={{ fontWeight: 500, textTransform: 'none' }}>(optional — shown as a Call button)</span></label>
                   <input value={fPhone} onChange={e => { setFPhone(e.target.value); clearErr('phone'); }} placeholder="+1 (856) 555-0142" type="tel" style={inpErr(fieldErrs.phone)} />
                   {fieldErrs.phone && <div style={fErr}>{fieldErrs.phone}</div>}
+                </div>
+
+                {/* House photos — up to 7 */}
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4c6157', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>Photos <span style={{ fontWeight: 500, textTransform: 'none' }}>(up to {MAX_PHOTOS} — show the room & place)</span></label>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {photos.map((m, i) => (
+                      <div key={i} style={{ position: 'relative', width: 66, height: 66, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(18,36,28,0.12)', flexShrink: 0 }}>
+                        <img src={m.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button type="button" onClick={() => removePhoto(i)} aria-label="Remove photo" style={{ position: 'absolute', top: 2, right: 2, width: 18, height: 18, borderRadius: '50%', background: 'rgba(18,36,28,0.72)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                      </div>
+                    ))}
+                    {photos.length < MAX_PHOTOS && (
+                      <label style={{ width: 66, height: 66, borderRadius: 10, border: '1.5px dashed rgba(18,36,28,0.22)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: uploading ? 'wait' : 'pointer', color: '#7d9188', flexShrink: 0, fontSize: 20 }}>
+                        {uploading ? <span style={{ fontSize: 11 }}>…</span> : '＋'}
+                        <input type="file" accept="image/*" multiple hidden disabled={uploading} onChange={e => { pickPhotos(e.target.files); e.target.value = ''; }} />
+                      </label>
+                    )}
+                  </div>
+                  {photoErr && <div style={fErr}>{photoErr}</div>}
                 </div>
               </div>
             )}
