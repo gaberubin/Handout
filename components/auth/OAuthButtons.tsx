@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { APPLE_SIGNIN_ENABLED } from '@/config/features';
 
 interface OAuthButtonsProps {
   /** 'login' shows "Sign in with …", 'signup' shows "Sign up with …" */
@@ -72,32 +73,34 @@ export function OAuthButtons({ mode = 'login' }: OAuthButtonsProps) {
           )}
         </button>
 
-        {/* Apple */}
-        <button
-          type="button"
-          onClick={() => signInWith('apple')}
-          disabled={loadingProvider !== null}
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            height: 48, width: '100%', borderRadius: 100,
-            background: 'rgba(18,36,28,0.04)', border: '1px solid rgba(18,36,28,0.12)',
-            color: '#12241C', fontSize: 14, fontWeight: 600,
-            cursor: loadingProvider ? 'wait' : 'pointer',
-            opacity: loadingProvider && loadingProvider !== 'apple' ? 0.5 : 1,
-            transition: 'background 0.15s, border-color 0.15s',
-          }}
-          onMouseEnter={e => { if (!loadingProvider) (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.28)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(18,36,28,0.12)'; }}
-        >
-          {loadingProvider === 'apple' ? (
-            <span style={{ fontSize: 13, color: '#4c6157' }}>Connecting to Apple…</span>
-          ) : (
-            <>
-              <AppleIcon />
-              <span>{verb} with Apple</span>
-            </>
-          )}
-        </button>
+        {/* Apple — hidden until Apple Developer / Supabase setup is done (APPLE_SIGNIN_ENABLED) */}
+        {APPLE_SIGNIN_ENABLED && (
+          <button
+            type="button"
+            onClick={() => signInWith('apple')}
+            disabled={loadingProvider !== null}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              height: 48, width: '100%', borderRadius: 100,
+              background: 'rgba(18,36,28,0.04)', border: '1px solid rgba(18,36,28,0.12)',
+              color: '#12241C', fontSize: 14, fontWeight: 600,
+              cursor: loadingProvider ? 'wait' : 'pointer',
+              opacity: loadingProvider && loadingProvider !== 'apple' ? 0.5 : 1,
+              transition: 'background 0.15s, border-color 0.15s',
+            }}
+            onMouseEnter={e => { if (!loadingProvider) (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.28)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(18,36,28,0.12)'; }}
+          >
+            {loadingProvider === 'apple' ? (
+              <span style={{ fontSize: 13, color: '#4c6157' }}>Connecting to Apple…</span>
+            ) : (
+              <>
+                <AppleIcon />
+                <span>{verb} with Apple</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Divider */}

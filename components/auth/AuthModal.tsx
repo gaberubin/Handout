@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
-  validateName, validateEmail, validatePhone, validatePassword,
+  validateName, validateEmail, validateEduEmail, validatePhone, validatePassword,
   validateRequired, normalizePhone, formatPhone, passwordChecks,
 } from '@/lib/validation';
+import { APPLE_SIGNIN_ENABLED } from '@/config/features';
 
 const CapAMIcon  = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>;
 const BriefAMIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
@@ -50,7 +51,7 @@ export function AuthModal({
   const isSignup = mode === 'signup';
   const e = {
     name:     isSignup ? validateName(name)                    : '',
-    email:    validateEmail(email),
+    email:    (isSignup && role === 'student') ? validateEduEmail(email) : validateEmail(email),
     phone:    isSignup ? validatePhone(phone)                  : '',
     password: isSignup ? validatePassword(password)            : validateRequired(password, 'Password'),
   };
@@ -68,6 +69,14 @@ export function AuthModal({
     const supabase = createClient();
 
     if (isSignup) {
+      // Block duplicate accounts by phone number (email uniqueness is already
+      // enforced by Supabase auth itself).
+      const rawPhoneCheck = normalizePhone(phone);
+      if (rawPhoneCheck) {
+        const { data: taken } = await supabase.rpc('phone_number_taken', { p_phone: rawPhoneCheck });
+        if (taken) { setError('An account already exists with this phone number.'); setLoading(false); return; }
+      }
+
       const { data, error: err } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
@@ -176,7 +185,7 @@ export function AuthModal({
           {isSignup && (
             <Field label="Full name" err={touched.name ? e.name : ''}>
               <input className={`fld-input ${touched.name && e.name ? 'err' : ''}`}
-                value={name} placeholder="Darshil Patel" disabled={loading}
+                value={name} placeholder="First and last name" disabled={loading}
                 onChange={ev => setName(ev.target.value)} onBlur={() => t('name')} />
             </Field>
           )}
@@ -231,7 +240,10 @@ export function AuthModal({
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
           <OAuthButton provider="google" label={isSignup ? 'Sign up with Google' : 'Log in with Google'} />
-          <OAuthButton provider="apple"  label={isSignup ? 'Sign up with Apple'  : 'Log in with Apple'} />
+          {/* Apple — hidden until Apple Developer / Supabase setup is done (APPLE_SIGNIN_ENABLED) */}
+          {APPLE_SIGNIN_ENABLED && (
+            <OAuthButton provider="apple" label={isSignup ? 'Sign up with Apple' : 'Log in with Apple'} />
+          )}
         </div>
 
         <p style={{ textAlign: 'center', fontSize: 12.5, color: 'var(--muted)', marginTop: 16 }}>

@@ -20,6 +20,17 @@ export const APP_VERSION = '1.0';
 // One consistent label for preserved-but-hidden features (replaces "Coming Soon").
 export const WHATS_NEXT = "What's Next";
 
+// Phone OTP verification on signup/login — OFF for now to keep the beta
+// frictionless (no SMS step). All the OTP code (edge function, RPC, UI) stays
+// in place; flip this back to true to re-require it with no other changes.
+export const OTP_ENABLED = false;
+
+// "Sign in with Apple" button — hidden for now (Apple Developer Program
+// setup not done yet). The button, handler, and icon all stay in the code;
+// flip this back to true once Apple's Services ID + key are configured in
+// Supabase, and it reappears with no other changes.
+export const APPLE_SIGNIN_ENABLED = false;
+
 // ── Beta features (fully accessible) ──────────────────────────────────────
 export const BETA_FEATURES = [
   'dashboard',
@@ -37,12 +48,15 @@ export const BETA_FEATURES = [
 // ── Coming-soon features (preserved, gated behind /coming-soon) ───────────
 // key → display metadata used by the Coming Soon page.
 export const COMING_SOON: Record<string, { title: string; emoji: string; blurb: string }> = {
-  food:           { title: 'Food Plans & Tiffins', emoji: '🍱', blurb: 'Homemade tiffins and campus meal plans from trusted local cooks.' },
+  food:           { title: 'Homemade Food',        emoji: '🍱', blurb: 'Homemade tiffins and campus meal plans from trusted local cooks.' },
   airport_pickup: { title: 'Airport Pickup',       emoji: '🚗', blurb: 'Get picked up when you land and settle in with a welcome package.' },
-  services:       { title: 'Student Services',     emoji: '💼', blurb: 'Babysitting, dog sitting, elder care, moving help, tutoring and more.' },
-  jobs:           { title: 'Student Jobs',         emoji: '🎓', blurb: 'On- and off-campus jobs and gigs built for students.' },
-  premium:        { title: 'Premium',              emoji: '✨', blurb: 'Optional premium perks — everything is free during the beta.' },
-  payments:       { title: 'Payments & Orders',    emoji: '💳', blurb: 'In-app payments, orders, wallet and coupons.' },
+  housing:        { title: 'Housing',              emoji: '🏠', blurb: 'Sublets, short-term stays and verified off-campus housing.' },
+  jobs:           { title: 'Student Jobs',         emoji: '💼', blurb: 'On- and off-campus jobs and gigs built for students.' },
+  services:       { title: 'Student Services',     emoji: '🧹', blurb: 'Babysitting, dog sitting, elder care, moving help and more.' },
+  tutoring:       { title: 'Tutoring',             emoji: '🎓', blurb: 'Peer tutoring and study help from students who aced the course.' },
+  // Internal keys — reachable only from preserved (flag-hidden) surfaces.
+  premium:        { title: 'More Features',        emoji: '✨', blurb: 'More ways to get the most out of Handout. Everything is free during the beta.' },
+  payments:       { title: 'More Features',        emoji: '✨', blurb: 'This part of Handout isn’t part of the free beta yet.' },
   ride_share:     { title: 'Ride Share',           emoji: '🚙', blurb: 'Share rides with students heading the same way.' },
 };
 
@@ -78,11 +92,14 @@ export function isComingSoon(feature: string): boolean {
   return BETA_MODE && feature in COMING_SOON;
 }
 
-// Coming-soon items rendered in the sidebar "Coming Soon" section.
+// Items rendered in the sidebar "What's Next" section. Mirrors the landing
+// page's What's Next list — no payment/premium features are advertised.
+// NOTE: "Housing" is intentionally excluded — Roommates already covers this
+// in the live Beta, so a separate coming-soon tile for it would be confusing.
 export const COMING_SOON_NAV: { feature: string; label: string }[] = [
-  { feature: 'food',           label: 'Food Plans' },
+  { feature: 'food',           label: 'Homemade Food' },
   { feature: 'airport_pickup', label: 'Airport Pickup' },
+  { feature: 'jobs',           label: 'Student Jobs' },
   { feature: 'services',       label: 'Student Services' },
-  { feature: 'jobs',           label: 'Jobs' },
-  { feature: 'premium',        label: 'Premium' },
+  { feature: 'tutoring',       label: 'Tutoring' },
 ];

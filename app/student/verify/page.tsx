@@ -136,8 +136,29 @@ export default function StudentVerifyPage() {
         <div style={{ background: 'linear-gradient(135deg,#12A150,#0d7a3d)', borderRadius: 20, padding: '24px 26px', color: '#fff', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><ShieldCheck size={26} /></div>
           <div>
-            <h2 style={{ fontFamily: "'Bricolage Grotesque',sans-serif", fontSize: 20, fontWeight: 800, margin: '0 0 3px' }}>Get verified</h2>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>Confirm you're a real student to earn the verified badge, unlock trust on listings, and access Campus Connect.</p>
+            <h2 style={{ fontFamily: "'Bricolage Grotesque',sans-serif", fontSize: 20, fontWeight: 800, margin: '0 0 3px' }}>Become verified <span style={{ fontSize: 12, fontWeight: 700, background: 'rgba(255,255,255,0.2)', borderRadius: 100, padding: '2px 9px', marginLeft: 4, verticalAlign: 'middle' }}>Optional</span></h2>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>Every Beta feature is free without verifying. Verification just adds trust — it&apos;s completely up to you.</p>
+          </div>
+        </div>
+
+        {/* Why verify — optional benefits */}
+        <div style={{ background: '#fff', border: '1px solid rgba(18,36,28,0.09)', borderRadius: 16, padding: '18px 20px', marginBottom: 22 }}>
+          <p style={{ margin: '0 0 12px', fontSize: 13.5, fontWeight: 800, color: '#12241C' }}>What verified students get</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 10 }}>
+            {[
+              ['🛡️', 'Higher trust', 'Students know you’re real'],
+              ['✅', 'Verified badge', 'Shown on your profile & listings'],
+              ['🏠', 'Better roommate visibility', 'Stand out in matching'],
+              ['⭐', 'Priority in future features', 'First access as we ship more'],
+            ].map(([e, t, d]) => (
+              <div key={t} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>{e}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#12241C' }}>{t}</div>
+                  <div style={{ fontSize: 11.5, color: '#7D9188' }}>{d}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

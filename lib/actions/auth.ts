@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { z } from 'zod';
+import { BETA_MODE } from '@/config/features';
 
 // ─────────────────────────────────────────────────────────────
 // IN-MEMORY RATE LIMITER (simple, free, no external dependencies)
@@ -152,8 +153,9 @@ export async function signInAction(formData: FormData): Promise<ActionResult> {
   revalidatePath('/', 'layout');
   if (role === 'admin') redirect('/admin/users');
   if (role === 'vendor' || role === 'provider') redirect('/vendor/dashboard');
-  // Students must pass verification before reaching the dashboard
-  if (status !== 'approved') redirect('/onboarding');
+  // Students must pass verification before reaching the dashboard — disabled
+  // during Beta, where verification is optional.
+  if (!BETA_MODE && status !== 'approved') redirect('/onboarding');
   redirect('/student/dashboard');
 }
 

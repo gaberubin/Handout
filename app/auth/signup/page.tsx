@@ -6,6 +6,8 @@ import { UniversitySelect } from '@/components/ui/UniversitySelect';
 import { MajorSelect } from '@/components/ui/MajorSelect';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { OAuthButtons } from '@/components/auth/OAuthButtons';
+import { OTP_ENABLED } from '@/config/features';
+import { validateEduEmail } from '@/lib/validation';
 
 const SU_CapIcon   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>;
 const SU_BriefIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>;
@@ -44,7 +46,10 @@ export default function SignupPage() {
   async function handleSubmit() {
     setError('');
     if (fullName.length < 2)              { setError('Enter your full name'); return; }
-    if (!email.includes('@'))             { setError('Enter a valid email'); return; }
+    if (role === 'student') {
+      const eduErr = validateEduEmail(email);
+      if (eduErr) { setError(eduErr); return; }
+    } else if (!email.includes('@'))      { setError('Enter a valid email'); return; }
     // Beta: phone is OPTIONAL. Only validate it when the user chooses to add one.
     if (phone && phone.replace(/\D/g,'').length < 10) { setError('Enter a valid 10-digit phone number'); return; }
     if (password.length < 6)             { setError('Password needs 6+ chars'); return; }
@@ -52,6 +57,15 @@ export default function SignupPage() {
 
     setLoading(true);
     const supabase = createClient();
+
+    // Block duplicate accounts by phone number (email uniqueness is already
+    // enforced by Supabase auth itself).
+    const rawPhoneCheck = phone.replace(/\D/g, '');
+    if (rawPhoneCheck) {
+      const { data: taken } = await supabase.rpc('phone_number_taken', { p_phone: rawPhoneCheck });
+      if (taken) { setError('An account already exists with this phone number.'); setLoading(false); return; }
+    }
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
@@ -73,7 +87,9 @@ export default function SignupPage() {
     const dest = role === 'vendor' ? '/vendor/onboarding' : '/student/dashboard';
 
     // Phone verification is optional — skip it entirely when no number was given.
-    if (!raw) {
+    // OTP is also disabled project-wide right now (OTP_ENABLED) to keep signup
+    // frictionless — this code path is preserved and re-enables with one flag flip.
+    if (!raw || !OTP_ENABLED) {
       setLoading(false);
       window.location.href = dest;
       return;
@@ -271,7 +287,7 @@ export default function SignupPage() {
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             <div>
               <label style={labelStyle}>Full name *</label>
-              <input type="text" value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="Darshil Patel" disabled={loading} style={inputStyle} />
+              <input type="text" value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="First and last name" disabled={loading} style={inputStyle} />
             </div>
             <div>
               <label style={labelStyle}>Email *</label>

@@ -1,5 +1,6 @@
 'use client';
 import { createClient } from '@/lib/supabase/client';
+import { BETA_MODE } from '@/config/features';
 
 /** Guard for authed dashboards. Self-heals a missing profile row and never
  *  redirects to the page it's already on (loop-safe).
@@ -30,7 +31,8 @@ export async function requireRole(expectedRole: 'student' | 'vendor' | 'admin') 
   if (!u) { go('/auth/login'); return null; }
 
   // Verification gate: everyone except admins must be approved to reach a dashboard.
-  if (u.role !== 'admin' && u.verification_status !== 'approved') {
+  // Disabled during Beta — ID verification is optional (see /student/verify).
+  if (!BETA_MODE && u.role !== 'admin' && u.verification_status !== 'approved') {
     go('/onboarding');
     return null;
   }

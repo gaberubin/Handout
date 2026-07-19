@@ -50,12 +50,15 @@ const betaNav = [
   { href: '/student/messages',        icon: <MessagesIcon />,  label: 'Messages' },
   { href: '/student/rewards',         icon: <RewardsIcon />,   label: 'Rewards' },
 ];
+// Mirrors the landing page's "What's Next" list — no payment/premium features.
+// NOTE: "Housing" is intentionally excluded — Roommates already covers this
+// in the live Beta, so a separate coming-soon tile for it would be confusing.
 const comingSoonNav = [
-  { href: '/coming-soon?feature=food',           icon: <FoodIcon />,     label: 'Food Plans',      badge: 'SOON' },
+  { href: '/coming-soon?feature=food',           icon: <FoodIcon />,     label: 'Homemade Food',   badge: 'SOON' },
   { href: '/coming-soon?feature=airport_pickup', icon: <PlaneIcon />,    label: 'Airport Pickup',  badge: 'SOON' },
+  { href: '/coming-soon?feature=jobs',           icon: <JobsIcon />,     label: 'Student Jobs',    badge: 'SOON' },
   { href: '/coming-soon?feature=services',       icon: <ServicesIcon />, label: 'Student Services',badge: 'SOON' },
-  { href: '/coming-soon?feature=jobs',           icon: <JobsIcon />,     label: 'Jobs',            badge: 'SOON' },
-  { href: '/coming-soon?feature=premium',        icon: <MemberIcon />,   label: 'Premium',         badge: 'SOON' },
+  { href: '/coming-soon?feature=tutoring',       icon: <StudyIcon />,    label: 'Tutoring',        badge: 'SOON' },
 ];
 const settingsNav = [
   { href: '/student/profile',  icon: <ProfileIcon />,  label: 'Profile' },

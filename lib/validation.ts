@@ -15,6 +15,14 @@ export function validateEmail(v: string): string {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(t)) return 'Enter a valid email (name@site.com)';
   return '';
 }
+
+/** Students must sign up with a .edu university email address. */
+export function validateEduEmail(v: string): string {
+  const generic = validateEmail(v);
+  if (generic) return generic;
+  if (!/\.edu$/i.test(v.trim())) return 'Students must use a .edu university email address';
+  return '';
+}
 export function normalizePhone(v: string): string { return v.replace(/\D/g, '').slice(0, 10); }
 export function formatPhone(v: string): string {
   const d = normalizePhone(v);

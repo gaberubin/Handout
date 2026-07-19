@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { AuthModal } from './AuthModal';
+import { BETA_MODE } from '@/config/features';
 
 type Mode = 'signup' | 'login';
 type GateCtx = {
@@ -62,7 +63,8 @@ export function AuthGateProvider({ children }: { children: React.ReactNode }) {
       if (prof?.verification_status) status = prof.verification_status;
     } catch { /* fall back to metadata role */ }
     // Must be verified (admins are exempt) before reaching any dashboard or running an action.
-    if (role !== 'admin' && status !== 'approved') { window.location.href = '/onboarding'; return; }
+    // Disabled during Beta — ID verification is optional.
+    if (!BETA_MODE && role !== 'admin' && status !== 'approved') { window.location.href = '/onboarding'; return; }
     if (a) { setTimeout(a, 80); return; }
     window.location.href =
       role === 'admin'  ? '/admin/users' :

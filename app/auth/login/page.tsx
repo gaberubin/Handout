@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { OAuthButtons } from '@/components/auth/OAuthButtons';
+import { OTP_ENABLED, BETA_MODE } from '@/config/features';
 
 const LG_LockIcon = () => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
 
@@ -55,14 +56,17 @@ export default function LoginPage() {
         if (prof?.phone)               rawPhone = prof.phone.replace(/\D/g, '');
       } catch { /* fall back */ }
 
+      // Verification is optional during Beta — skip the onboarding gate.
       const dest =
-        role === 'admin'                           ? '/admin/users' :
-        (role === 'vendor' || role === 'provider') ? '/vendor/dashboard' :
-        status !== 'approved'                      ? '/onboarding' :
-                                                     '/student/dashboard';
+        role === 'admin'                             ? '/admin/users' :
+        (role === 'vendor' || role === 'provider')   ? '/vendor/dashboard' :
+        (!BETA_MODE && status !== 'approved')        ? '/onboarding' :
+                                                        '/student/dashboard';
 
-      // If user has a phone, send OTP before granting access
-      if (rawPhone.length >= 10) {
+      // If user has a phone, send OTP before granting access.
+      // OTP is disabled project-wide right now (OTP_ENABLED) for a frictionless
+      // beta login — this whole path is preserved and re-enables with one flag flip.
+      if (OTP_ENABLED && rawPhone.length >= 10) {
         const { data: fnData } = await supabase.functions.invoke('send-phone-otp', {
           body: { phone: rawPhone },
         });

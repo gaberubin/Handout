@@ -28,7 +28,7 @@ const features = [
 
 const testimonials = [
   { initials:'AK', bg:'#12A150', fg:'#ffffff', name:'Arjun Kumar',  uni:'UIC · CS',         quote:'"Found my roommate in 3 days. 94% match — he became my closest friend here."' },
-  { initials:'PM', bg:'#12A150', fg:'#fff',    name:'Priya Mehta',  uni:'Rowan · Business',  quote:'"Anaya\'s Kitchen changed my life. Actual home cooking for $8 a meal. Game changer."' },
+  { initials:'PM', bg:'#12A150', fg:'#fff',    name:'Priya Mehta',  uni:'Rowan · Business',  quote:'"Sold my old textbooks in a week and found my study group here. All of it free."' },
   { initials:'LN', bg:'#E11D48', fg:'#fff',    name:'Lin Nguyen',   uni:'Rowan · Engineering',quote:'"As an international student, Handout was the first thing that made this place feel like home."' },
 ];
 
@@ -173,7 +173,7 @@ export default function LandingPage() {
               <span style={{ fontSize:10.5, fontWeight:800, letterSpacing:2, textTransform:'uppercase', color:'#7C6BD1' }}>What&apos;s Next</span>
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              {[['🍱','Homemade Food'],['🚗','Airport Pickup'],['🏠','Housing'],['💼','Student Jobs'],['🧹','Student Services'],['🎓','Tutoring'],['✨','More Features']].map(([e,f]) => (
+              {[['🍱','Homemade Food'],['🚗','Airport Pickup'],['💼','Student Jobs'],['🧹','Student Services'],['🎓','Tutoring'],['✨','More Features']].map(([e,f]) => (
                 <div key={f} style={{ display:'flex', alignItems:'center', gap:12 }}>
                   <span style={{ fontSize:18, width:22, textAlign:'center', flexShrink:0 }}>{e}</span>
                   <span style={{ fontSize:15.5, fontWeight:600, color:'var(--muted)' }}>{f}</span>

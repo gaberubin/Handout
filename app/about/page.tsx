@@ -11,18 +11,18 @@ const VALUES = [
   { icon: '🏠', title: 'Home away from home', desc: 'We believe every student deserves a comfortable, affordable living situation. Handout makes finding roommates and sublets simple.' },
   { icon: '🤝', title: 'Community first', desc: 'From shared rides to study groups, Handout connects students who are going through the same experiences — together.' },
   { icon: '🔒', title: 'Safe & verified', desc: 'Every vendor is verified. Every student profile is university-linked. You always know who you\'re dealing with.' },
-  { icon: '💰', title: 'Affordable always', desc: 'Our free tier gives every student access to core features. Pro features stay budget-friendly because students shouldn\'t go broke saving money.' },
+  { icon: '💰', title: 'Free during Beta', desc: 'Every feature in the Handout Beta is completely free. No payments, no subscriptions — students shouldn\'t go broke saving money.' },
 ];
 
 const TEAM = [
-  { name: 'Darshil Patel', role: 'Founder & CEO', school: 'Rowan University', initials: 'DP' },
+  { name: 'The Handout Team', role: 'Founder & Product', school: 'Rowan University', initials: 'H' },
   { name: 'Alex Chen', role: 'Head of Product', school: 'Rutgers University', initials: 'AC' },
   { name: 'Priya Sharma', role: 'Engineering Lead', school: 'NJIT', initials: 'PS' },
   { name: 'Marcus Johnson', role: 'Design Lead', school: 'Montclair State', initials: 'MJ' },
 ];
 
 const FAQ = [
-  { q: 'Is Handout free to use?', a: 'Yes! Our core features are completely free. Plus ($9/mo) and Pro ($19/mo) plans unlock advanced features like unlimited messaging, priority bookings, and Pro discounts.' },
+  { q: 'Is Handout free to use?', a: 'Yes! Handout is completely free during our public Beta — every feature, no payments and no subscriptions.' },
   { q: 'How do I become a vendor?', a: 'Sign up as a vendor during registration or switch your account type in settings. Submit your profile and start listing your services within minutes.' },
   { q: 'Is my data safe?', a: 'Absolutely. We use Supabase with row-level security, encrypted connections, and never sell your personal data to third parties.' },
   { q: 'Which universities are supported?', a: 'We support 400+ US universities. If yours isn\'t listed, contact us and we\'ll add it within 24 hours.' },

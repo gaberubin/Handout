@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { BETA_MODE } from '@/config/features';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -31,8 +32,10 @@ export async function GET(request: Request) {
 
       if (role === 'admin') return NextResponse.redirect(`${origin}/admin/users`);
       if (role === 'vendor' || role === 'provider') return NextResponse.redirect(`${origin}/vendor/dashboard`);
-      // Students (and new OAuth users with default role) must pass verification
-      if (status !== 'approved') return NextResponse.redirect(`${origin}/onboarding`);
+      // In Beta, ID verification is optional — new Google/Apple users go straight
+      // to the dashboard (the "Become Verified" card is available there).
+      // Outside Beta, students must pass verification first.
+      if (!BETA_MODE && status !== 'approved') return NextResponse.redirect(`${origin}/onboarding`);
       return NextResponse.redirect(`${origin}/student/dashboard`);
     }
   }

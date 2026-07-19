@@ -2,7 +2,7 @@ import { test as setup } from '@playwright/test';
 import fs from 'fs';
 
 const ACCOUNTS = [
-  { role: 'student', email: 'darshil@user.app', pw: 'D@rshil1601' },
+  { role: 'student', email: 'darshil.student@rowan.edu', pw: 'D@rshil1601' },
   { role: 'vendor',  email: 'test2@handout.app', pw: 'Test123' },
   { role: 'admin',   email: 'darshil@admin.app', pw: 'D@rshil1601' },
 ];

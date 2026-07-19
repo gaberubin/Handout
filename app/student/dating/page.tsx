@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { StudentLayout } from '@/components/layout/StudentLayout';
@@ -26,6 +27,9 @@ const CapIcon   = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="no
 const PinIcon   = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
 const SparkIcon = () => <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
 const BigEye    = () => <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+const MoreIcon  = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>;
+const FlagIcon  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>;
+const BlockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>;
 
 const DT_FEAT = [
   { Icon: LockIcon, txt: 'University-locked — your campus only' },
@@ -450,6 +454,108 @@ function sharedCount(a?:string[], b?:string[]) {
   return b.filter(i => s.has(i)).length;
 }
 
+/* ── Block a user (unmatches + hides them from Discover/Liked You too) ───────*/
+async function blockDatingUser(blockedId: string) {
+  await createClient().rpc('block_dating_user', { p_blocked_id: blockedId });
+}
+
+/* ── Report reasons ───────────────────────────────────────────────────────────*/
+const REPORT_REASONS = ['Harassment or threats', 'Fake profile', 'Inappropriate photos', 'Spam or scam', 'Underage', 'Other'];
+
+/* ── Report modal ─────────────────────────────────────────────────────────────*/
+function ReportModal({ profile, onClose, onSubmitted }: { profile:DProfile; onClose:()=>void; onSubmitted:()=>void }) {
+  const [reason, setReason]   = useState('');
+  const [details, setDetails] = useState('');
+  const [busy, setBusy]       = useState(false);
+  const [err, setErr]         = useState('');
+
+  async function submit() {
+    if (!reason) { setErr('Please choose a reason.'); return; }
+    setBusy(true); setErr('');
+    const sb = createClient();
+    const { data:{user} } = await sb.auth.getUser();
+    const { error } = await sb.from('dating_reports').insert({
+      reporter_id: user?.id, reported_id: profile.user_id, reason, details: details.trim() || null,
+    });
+    setBusy(false);
+    if (error) { setErr('Could not submit — try again.'); return; }
+    onSubmitted();
+  }
+
+  return (
+    <div style={{ ...OVERLAY, zIndex:2100 }} onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}>
+      <div style={{ background:'#fff', border:'1px solid rgba(18,36,28,0.1)', borderRadius:22, padding:'26px 24px', width:'100%', maxWidth:400 }} onClick={e=>e.stopPropagation()}>
+        <h3 style={{ fontSize:18, fontWeight:800, color:'var(--white)', margin:'0 0 4px' }}>Report {profile.display_name}</h3>
+        <p style={{ fontSize:12.5, color:'var(--muted)', margin:'0 0 18px' }}>Our team reviews every report. This won't notify {profile.display_name}.</p>
+        <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:14 }}>
+          {REPORT_REASONS.map(r => (
+            <button key={r} type="button" onClick={()=>setReason(r)} style={{ textAlign:'left', padding:'10px 14px', borderRadius:12, cursor:'pointer', border:`1.5px solid ${reason===r?'#C25B4E':'rgba(18,36,28,0.12)'}`, background:reason===r?'rgba(194,91,78,0.06)':'#fff', fontSize:13.5, fontWeight:600, color:reason===r?'#C25B4E':'var(--white)' }}>{r}</button>
+          ))}
+        </div>
+        <textarea value={details} onChange={e=>setDetails(e.target.value)} rows={3} placeholder="Additional details (optional)"
+          style={{ width:'100%', padding:'11px 14px', background:'#F1F7F3', border:'1px solid rgba(18,36,28,0.12)', borderRadius:10, color:'var(--white)', fontSize:13.5, outline:'none', resize:'none', boxSizing:'border-box', fontFamily:'inherit' }}/>
+        {err && <div style={{ marginTop:12, padding:'9px 12px', borderRadius:10, background:'rgba(194,91,78,0.10)', border:'1px solid rgba(194,91,78,0.3)', color:'#C25B4E', fontSize:12.5 }}>{err}</div>}
+        <div style={{ display:'flex', gap:10, marginTop:16 }}>
+          <button onClick={submit} disabled={busy} style={{ flex:1, height:44, borderRadius:100, background:'#C25B4E', border:'none', color:'#fff', fontWeight:800, fontSize:14, cursor:'pointer' }}>{busy?'Submitting…':'Submit report'}</button>
+          <button onClick={onClose} style={{ height:44, padding:'0 18px', borderRadius:100, background:'transparent', border:'1px solid rgba(18,36,28,0.12)', color:'var(--muted)', fontWeight:600, fontSize:14, cursor:'pointer' }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Safety menu (••• → Block / Report) ───────────────────────────────────────*/
+function SafetyMenu({ profile, onBlocked, showReport=true }: { profile:DProfile; onBlocked:()=>void; showReport?:boolean }) {
+  const [open, setOpen]           = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const [reported, setReported]   = useState(false);
+  const [pos, setPos]             = useState<{top:number; left:number}>({ top:0, left:0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  async function doBlock() {
+    setOpen(false);
+    if (!confirm(`Block ${profile.display_name}? You'll unmatch and won't see each other again.`)) return;
+    await blockDatingUser(profile.user_id);
+    onBlocked();
+  }
+
+  function toggle() {
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 6, left: Math.max(8, r.right - 150) });
+    }
+    setOpen(o=>!o);
+  }
+
+  return (
+    <div onClick={e=>e.stopPropagation()}>
+      <button ref={btnRef} onClick={toggle} title="Safety options" style={{ width:34, height:34, borderRadius:'50%', background:'rgba(18,36,28,0.05)', border:'1px solid rgba(18,36,28,0.09)', color:'var(--muted)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}><MoreIcon /></button>
+      {/* Rendered via portal to document.body so it's never clipped by an ancestor's overflow:hidden (e.g. the match card). Positioned with `fixed` from the trigger button's real coordinates. */}
+      {open && typeof document !== 'undefined' && createPortal(
+        <>
+          <div style={{ position:'fixed', inset:0, zIndex:2050 }} onClick={()=>setOpen(false)}/>
+          <div style={{ position:'fixed', top:pos.top, left:pos.left, zIndex:2051, background:'#fff', border:'1px solid rgba(18,36,28,0.1)', borderRadius:14, boxShadow:'0 12px 30px rgba(18,36,28,0.16)', overflow:'hidden', minWidth:150 }}>
+            {showReport && (
+              <button onClick={()=>{ setOpen(false); setReporting(true); }} style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'11px 14px', background:'transparent', border:'none', cursor:'pointer', fontSize:13, fontWeight:600, color:'#12241C', textAlign:'left' }}><FlagIcon /> Report</button>
+            )}
+            <button onClick={doBlock} style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'11px 14px', background:'transparent', border:'none', borderTop: showReport ? '1px solid rgba(18,36,28,0.07)' : 'none', cursor:'pointer', fontSize:13, fontWeight:600, color:'#C25B4E', textAlign:'left' }}><BlockIcon /> Block</button>
+          </div>
+        </>,
+        document.body
+      )}
+      {reporting && !reported && <ReportModal profile={profile} onClose={()=>setReporting(false)} onSubmitted={()=>{ setReported(true); setTimeout(()=>setReporting(false), 1400); }}/>}
+      {reporting && reported && (
+        <div style={{ ...OVERLAY, zIndex:2100 }}>
+          <div style={{ background:'#fff', borderRadius:22, padding:'32px 28px', textAlign:'center', maxWidth:320 }}>
+            <div style={{ color:'#12A150', marginBottom:10, display:'inline-flex' }}><CheckIcon /></div>
+            <p style={{ fontSize:15, fontWeight:700, color:'var(--white)', margin:0 }}>Report submitted</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Profile card ────────────────────────────────────────────────────────────*/
 function ProfileCard({ profile, myInterests }: { profile:DProfile; myInterests?:string[] }) {
   const pics = allPhotos(profile);
@@ -527,15 +633,20 @@ function DiscoverView({ me, meId, myProfile }: { me:Me; meId:string; myProfile:D
   const load = async () => {
     setLoading(true);
     const sb = createClient();
-    const { data:done } = await sb.from('dating_likes').select('liked_id').eq('liker_id', me.id);
+    const [{ data:done }, { data:blocked }] = await Promise.all([
+      sb.from('dating_likes').select('liked_id').eq('liker_id', me.id),
+      sb.from('dating_blocks').select('blocked_id').eq('blocker_id', me.id),
+    ]);
     const doneIds = new Set((done||[]).map((l:any)=>l.liked_id));
+    const blockedIds = new Set((blocked||[]).map((b:any)=>b.blocked_id));
     let q = sb.from('dating_profiles').select('*').eq('is_visible',true).neq('user_id',me.id);
     if (me.university) q = q.eq('university', me.university);
     const { data:rows } = await q;
-    // 1) hide already-swiped  2) respect who each side is looking for
-    // 3) rank by shared interests (random within equal overlap)
+    // 1) hide already-swiped  2) hide blocked  3) respect who each side is
+    // looking for  4) rank by shared interests (random within equal overlap)
     const pool = (rows||[])
       .filter((p:DProfile)=>!doneIds.has(p.user_id))
+      .filter((p:DProfile)=>!blockedIds.has(p.user_id))
       .filter((p:DProfile)=>mutualFit(myProfile, p))
       .map((p:DProfile)=>({ p, shared: sharedCount(myProfile.interests, p.interests), r: Math.random() }))
       .sort((a,b)=>b.shared-a.shared || a.r-b.r)
@@ -651,9 +762,13 @@ function LikedYouView({ me }: { me:Me }) {
     const { data:them } = await sb.from('dating_likes').select('liker_id').eq('liked_id', me.id);
     const theirIds = (them||[]).map((l:any)=>l.liker_id);
     if (!theirIds.length) { setLoading(false); return; }
-    const { data:mine } = await sb.from('dating_likes').select('liked_id').eq('liker_id', me.id);
+    const [{ data:mine }, { data:blocked }] = await Promise.all([
+      sb.from('dating_likes').select('liked_id').eq('liker_id', me.id),
+      sb.from('dating_blocks').select('blocked_id').eq('blocker_id', me.id),
+    ]);
     const myLiked = new Set((mine||[]).map((l:any)=>l.liked_id));
-    const pending = theirIds.filter((id:string)=>!myLiked.has(id));
+    const blockedIds = new Set((blocked||[]).map((b:any)=>b.blocked_id));
+    const pending = theirIds.filter((id:string)=>!myLiked.has(id) && !blockedIds.has(id));
     if (!pending.length) { setLoading(false); return; }
     const { data:rows } = await sb.from('dating_profiles').select('*').in('user_id',pending).eq('is_visible',true);
     setLikers(rows||[]);
@@ -687,9 +802,10 @@ function LikedYouView({ me }: { me:Me }) {
               <span style={{ fontSize:14, fontWeight:700, color:'#7C6BD1' }}>{viewing.display_name} liked your profile</span>
             </div>
             <ProfileCard profile={viewing} />
-            <div style={{ padding:'16px 20px', borderTop:'1px solid rgba(18,36,28,0.09)', display:'flex', gap:12 }}>
+            <div style={{ padding:'16px 20px', borderTop:'1px solid rgba(18,36,28,0.09)', display:'flex', gap:12, alignItems:'center' }}>
               <button onClick={()=>act(viewing,false)} disabled={actingOn===viewing.user_id} style={{ flex:1, height:50, borderRadius:14, background:'transparent', border:'1px solid rgba(194,91,78,0.4)', color:'#C25B4E', cursor:'pointer', fontSize:14, fontWeight:700 }}>✕ Pass</button>
               <button onClick={()=>act(viewing,true)}  disabled={actingOn===viewing.user_id} style={{ flex:1, height:50, borderRadius:14, background:'linear-gradient(135deg,#7C6BD1,#12A150)', border:'none', color:'#fff', cursor:'pointer', fontSize:14, fontWeight:800, display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}><Heart size={16} color="#fff" /> Like back</button>
+              <SafetyMenu profile={viewing} showReport={false} onBlocked={()=>{ setLikers(p=>p.filter(x=>x.user_id!==viewing.user_id)); setViewing(null); }}/>
             </div>
           </div>
         </div>
@@ -716,9 +832,10 @@ function LikedYouView({ me }: { me:Me }) {
             </div>
             <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8, flexShrink:0 }}>
               <span style={{ fontSize:11, color:'var(--amber)', fontWeight:700 }}>View →</span>
-              <div style={{ display:'flex', gap:6 }}>
+              <div style={{ display:'flex', gap:6, alignItems:'center' }}>
                 <button onClick={e=>{ e.stopPropagation(); act(p,false); }} disabled={actingOn===p.user_id} style={{ width:38, height:38, borderRadius:'50%', background:'transparent', border:'1px solid rgba(194,91,78,0.35)', color:'#C25B4E', cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center' }}>✕</button>
                 <button onClick={e=>{ e.stopPropagation(); act(p,true); }}  disabled={actingOn===p.user_id} style={{ width:38, height:38, borderRadius:'50%', background:'var(--amber)', border:'none', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}><Heart size={16} color="#fff" /></button>
+                <SafetyMenu profile={p} showReport={false} onBlocked={()=>setLikers(prev=>prev.filter(x=>x.user_id!==p.user_id))}/>
               </div>
             </div>
           </div>
@@ -768,11 +885,12 @@ function MatchesView({ me }: { me:Me }) {
               <span style={{ fontSize:14, fontWeight:700, color:'var(--green)' }}>It's a match with {viewing.display_name}!</span>
             </div>
             <ProfileCard profile={viewing} />
-            <div style={{ padding:'16px 20px', borderTop:'1px solid rgba(18,36,28,0.09)', display:'flex', gap:12 }}>
+            <div style={{ padding:'16px 20px', borderTop:'1px solid rgba(18,36,28,0.09)', display:'flex', gap:12, alignItems:'center' }}>
               <button onClick={()=>setViewing(null)} style={{ flex:1, height:50, borderRadius:14, background:'transparent', border:'1px solid rgba(18,36,28,0.09)', color:'var(--muted)', cursor:'pointer', fontSize:14, fontWeight:700 }}>Close</button>
               <Link href={`/student/dating/chat?to=${viewing.user_id}`} style={{ flex:2, height:50, borderRadius:14, background:'var(--amber)', border:'none', color:'#fff', cursor:'pointer', fontSize:14, fontWeight:800, textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
                 <ChatIcon /> Send a message
               </Link>
+              <SafetyMenu profile={viewing} onBlocked={()=>{ setMatches(p=>p.filter(x=>x.user_id!==viewing.user_id)); setViewing(null); }}/>
             </div>
           </div>
         </div>
@@ -807,6 +925,7 @@ function MatchesView({ me }: { me:Me }) {
                   <Link href={`/student/dating/chat?to=${m.user_id}`} onClick={e=>e.stopPropagation()} style={{ height:38, padding:'0 16px', lineHeight:'38px', borderRadius:100, background:'var(--amber)', color:'#fff', fontSize:12, fontWeight:800, textDecoration:'none', whiteSpace:'nowrap' }}>
                     <span style={{ display:'inline-flex', alignItems:'center', gap:5 }}><ChatIcon /> Text</span>
                   </Link>
+                  <SafetyMenu profile={m} onBlocked={()=>setMatches(p=>p.filter(x=>x.user_id!==m.user_id))}/>
                 </div>
               </div>
             </div>
@@ -837,7 +956,9 @@ export default function DatingPage() {
       const { data:u }  = await sb.from('users').select('plan,full_name,avatar_url').eq('id', user.id).single();
       const { data:sp } = await sb.from('student_profiles').select('university').eq('user_id', user.id).maybeSingle();
       setMe({ id:user.id, plan:u?.plan||'free', university:sp?.university||'', full_name:u?.full_name||'', avatar_url:u?.avatar_url||'' });
-      if (['plus','pro'].includes(u?.plan||'')) {
+      // Campus Connect is free during Beta — load profile/likes for everyone,
+      // not just plus/pro members.
+      if (BETA_MODE || ['plus','pro'].includes(u?.plan||'')) {
         const { data:dp } = await sb.from('dating_profiles').select('*').eq('user_id', user.id).maybeSingle();
         if (dp) setMyProfile(dp as DProfile); else setShowSetup(true);
         // pending likes → badge on the "Liked You" tab
