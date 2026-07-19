@@ -20,10 +20,13 @@ export default function AdminVerifications() {
   const [viewing, setViewing] = useState<string | null>(null);
 
   async function load() {
-    const { data } = await createClient()
+    // verifications has TWO FKs to users (user_id + reviewed_by), so the join
+    // must name its FK explicitly — a bare users(...) is ambiguous and errors.
+    const { data, error } = await createClient()
       .from('verifications')
-      .select('*, users(full_name, email, role, country, country_code, phone, city, state, zip, address)')
+      .select('*, users:users!verifications_user_id_fkey(full_name, email, role, country, country_code, phone, city, state, zip, address)')
       .order('submitted_at', { ascending: false });
+    if (error) console.error('verifications load failed:', error.message);
     setRows(data || []);
     setReady(true);
   }
