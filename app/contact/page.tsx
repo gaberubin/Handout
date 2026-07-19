@@ -6,10 +6,10 @@ export const metadata = {
 };
 
 const CHANNELS = [
-  { emoji: '💬', title: 'General support',   body: 'Account issues, bugs, billing questions, or anything else.',            email: 'support@handout.app',  note: 'Replies within 1 business day' },
-  { emoji: '🛡️', title: 'Trust & safety',    body: 'Report a user, a scam, or anything that made you feel unsafe.',        email: 'safety@handout.app',   note: 'Reviewed within 24 hours' },
-  { emoji: '🍱', title: 'Cooks & providers', body: 'Want to sell food or offer a service on Handout? Start here.',         email: 'vendors@handout.app',  note: 'Onboarding help included' },
-  { emoji: '📣', title: 'Press & partners',  body: 'Universities, student orgs, media, and partnership inquiries.',        email: 'hello@handout.app',    note: 'We love working with campuses' },
+  { emoji: '💬', title: 'General support',   body: 'Account issues, bugs, billing questions, or anything else.',            email: 'handout.corp@gmail.com',  note: 'Replies within 1 business day' },
+  { emoji: '🛡️', title: 'Trust & safety',    body: 'Report a user, a scam, or anything that made you feel unsafe.',        email: 'handout.corp@gmail.com',   note: 'Reviewed within 24 hours' },
+  { emoji: '🍱', title: 'Cooks & providers', body: 'Want to sell food or offer a service on Handout? Start here.',         email: 'handout.corp@gmail.com',  note: 'Onboarding help included' },
+  { emoji: '📣', title: 'Press & partners',  body: 'Universities, student orgs, media, and partnership inquiries.',        email: 'handout.corp@gmail.com',    note: 'We love working with campuses' },
 ];
 
 export default function ContactPage() {
@@ -48,7 +48,7 @@ export default function ContactPage() {
           <div style={{ fontSize:30 }}>📍</div>
           <div style={{ flex:1, minWidth:220 }}>
             <div style={{ fontFamily:"'Bricolage Grotesque',sans-serif", fontSize:17, fontWeight:800, color:'var(--white)', marginBottom:4 }}>Find us on campus</div>
-            <div style={{ fontSize:14, color:'var(--light)' }}>Handout is built at Rowan University · Glassboro, NJ. Look for our table at student org fairs, or say hi at hello@handout.app.</div>
+            <div style={{ fontSize:14, color:'var(--light)' }}>Handout is built at Rowan University · Glassboro, NJ. Look for our table at student org fairs, or say hi at handout.corp@gmail.com.</div>
           </div>
           <Link href="/help" style={{ display:'inline-flex', alignItems:'center', gap:7, background:'var(--amber)', color:'#ffffff', fontWeight:700, fontSize:13, padding:'11px 20px', borderRadius:100, textDecoration:'none' }}>Visit the Help Center →</Link>
         </div>
