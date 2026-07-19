@@ -26,7 +26,7 @@ export default function AdminSettingsPage(){
           <CardHeader title="Platform Config"/>
           <div className="flex flex-col gap-3">
             <Field label="Platform Name"><Input defaultValue="Handout"/></Field>
-            <Field label="Support Email"><Input type="email" defaultValue="support@handout.app"/></Field>
+            <Field label="Support Email"><Input type="email" defaultValue="handout.corp@gmail.com"/></Field>
             <Field label="Platform Commission (%)"><Input type="number" defaultValue="10"/></Field>
             <Field label="Max Free Matches / Month"><Input type="number" defaultValue="5"/></Field>
           </div>
