@@ -27,7 +27,7 @@ export default function SafetyPage() {
         {/* Quick actions */}
         <div className="rg-3" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, marginBottom:56 }}>
           <ActionCard emoji="🚨" title="Emergency?" body="Call 911 first. Always. Then let us know what happened." />
-          <ActionCard emoji="🛡️" title="Report a user" body="Email safety@handout.app — we review every report within 24 hours." />
+          <ActionCard emoji="🛡️" title="Report a user" body="Email handout.corp@gmail.com — we review every report within 24 hours." />
           <ActionCard emoji="💬" title="Something feels off?" body="Trust your instincts. Block, leave, and tell us about it." />
         </div>
 
@@ -58,13 +58,13 @@ export default function SafetyPage() {
         <Section title="How to report">
           <P>Three ways, all reviewed by a human:</P>
           <Bullet>Tap <Strong>Report</Strong> on any profile, listing, or message thread.</Bullet>
-          <Bullet>Email <Strong>safety@handout.app</Strong> with screenshots if you have them.</Bullet>
+          <Bullet>Email <Strong>handout.corp@gmail.com</Strong> with screenshots if you have them.</Bullet>
           <Bullet>For anything urgent involving physical safety, contact local authorities first (911), then notify us.</Bullet>
           <P>We aim to respond to every safety report within 24 hours, and we never tell the reported person who reported them.</P>
         </Section>
 
         <div style={{ marginTop:64, paddingTop:32, borderTop:'1px solid var(--border)', fontSize:13, color:'var(--muted)', textAlign:'center' }}>
-          Questions about safety? Email safety@handout.app — a person reads every message.
+          Questions about safety? Email handout.corp@gmail.com — a person reads every message.
           <br/><br/>
           © 2026 Handout. All rights reserved.
         </div>
