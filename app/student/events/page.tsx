@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { StudentLayout } from '@/components/layout/StudentLayout';
 import { validateText, validateParagraph, validatePrice } from '@/lib/validation';
 import { awardPoints } from '@/lib/points';
+import { getMyCampus } from '@/lib/campus';
 
 /* ── Icons ── */
 const CalIcon    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
@@ -49,8 +50,11 @@ export default function EventsPage() {
 
   async function load(uid: string) {
     const sb = createClient();
+    const campus = await getMyCampus();
+    let evQ = sb.from('campus_events').select('*').eq('is_active', true).order('event_date', { ascending: true });
+    if (campus) evQ = evQ.eq('campus', campus);   // campus isolation — only my university
     const [{ data: evs }, { data: rs }, { data: myRs }] = await Promise.all([
-      sb.from('campus_events').select('*').eq('is_active', true).order('event_date', { ascending: true }),
+      evQ,
       sb.from('event_rsvps').select('event_id'),
       sb.from('event_rsvps').select('event_id').eq('user_id', uid),
     ]);
