@@ -7,6 +7,7 @@ import { processPickedFiles } from '@/lib/imageCompress';
 import { validateParagraph, validatePrice } from '@/lib/validation';
 import { awardPoints } from '@/lib/points';
 import { BETA_MODE } from '@/config/features';
+import { getMyCampus } from '@/lib/campus';
 
 /* ── Icons ── */
 const ChatIcon  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
@@ -43,7 +44,10 @@ export function Marketplace({ me }: { me: Me }) {
 
   async function load() {
     const sb = createClient();
-    const { data, error } = await sb.from('market_listings').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(60);
+    const campus = await getMyCampus();
+    let q = sb.from('market_listings').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(60);
+    if (campus) q = q.eq('campus', campus);   // campus isolation — only my university
+    const { data, error } = await q;
     if (error) { setMigrated(false); setLoading(false); return; }
     const rows = (data || []) as Listing[];
     setListings(rows);
