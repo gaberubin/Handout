@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { OAuthButtons } from '@/components/auth/OAuthButtons';
 import { OTP_ENABLED, BETA_MODE } from '@/config/features';
 
@@ -12,6 +12,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
+
+  // Surface errors handed back by /auth/callback (e.g. a non-.edu Google
+  // account) — otherwise the user is bounced here with no explanation.
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('error');
+    if (!code) return;
+    setError(
+      code === 'edu_required'
+        ? 'Handout is for students — please sign in with your university .edu email address.'
+        : code === 'oauth_failed'
+        ? 'We could not complete that sign-in. Please try again.'
+        : 'Sign-in did not complete. Please try again.'
+    );
+    window.history.replaceState({}, '', '/auth/login');
+  }, []);
 
   // OTP step
   const [step, setStep]           = useState<'form'|'otp'>('form');
