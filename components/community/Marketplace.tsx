@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { processPickedFiles } from '@/lib/imageCompress';
 import { validateParagraph, validatePrice } from '@/lib/validation';
 import { awardPoints } from '@/lib/points';
+import { BETA_MODE } from '@/config/features';
 
 /* ── Icons ── */
 const ChatIcon  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
@@ -36,7 +37,9 @@ export function Marketplace({ me }: { me: Me }) {
   const [migrated, setMigrated] = useState(true);
   const [saved, setSaved]       = useState<Set<string>>(new Set());
 
-  const canSell = !!me && (me.verification_status === 'approved' || me.is_verified === true);
+  // BETA: any signed-in student can list. Verification stays optional (it still
+  // earns the verified badge) — flip BETA_MODE off to require it again.
+  const canSell = !!me && (BETA_MODE || me.verification_status === 'approved' || me.is_verified === true);
 
   async function load() {
     const sb = createClient();
@@ -237,7 +240,7 @@ function PostModal({ me, onClose, onPosted }: { me: { id:string }; onClose: () =
       price: parseFloat(price), category, media: urls, is_active: true,
     });
     setBusy(false);
-    if (error) { setErr(error.message.includes('policy') ? 'Only verified students can post items.' : error.message); return; }
+    if (error) { setErr(error.message.includes('policy') ? 'Please sign in again to post an item.' : error.message); return; }
     awardPoints('list_item');
     onPosted();
   }
