@@ -35,6 +35,27 @@ function ChipRow({ label, options, value, set }: { label: string; options: strin
     </div>
   );
 }
+function ChipMulti({ label, options, values, set }: { label: string; options: string[]; values: string[]; set: (v: string[]) => void }) {
+  const toggle = (o: string) => set(values.includes(o) ? values.filter(x => x !== o) : [...values, o]);
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4c6157', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</label>
+      <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+        {options.map(o => {
+          const on = values.includes(o);
+          return (
+            <button type="button" key={o} onClick={() => toggle(o)}
+              style={{ padding: '7px 13px', borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                border: `1px solid ${on ? '#12A150' : 'rgba(18,36,28,0.12)'}`,
+                background: on ? 'rgba(18,161,80,0.10)' : '#fff',
+                color: on ? '#0F8A44' : '#4c6157' }}>{on ? '✓ ' : ''}{o}</button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+const AMENITY_OPTIONS = ['Utilities included', 'WiFi', 'Parking', 'In-unit laundry', 'AC', 'Dishwasher', 'Gym', 'Pet-friendly'];
 function match(a: any, b: any) {
   let total = 0, score = 0;
   const flex = ['No preference', 'any', 'Any', '', null, undefined];
@@ -59,11 +80,17 @@ export default function RoommatesPage() {
   const [fTitle, setFTitle] = useState('');
   const [fLoc, setFLoc]     = useState('');
   const [fRent, setFRent]   = useState('');
+  const [fRentMin, setFRentMin] = useState('');
+  const [fRentMax, setFRentMax] = useState('');
   const [fDate, setFDate]   = useState('');
   const [fDesc, setFDesc]   = useState('');
   // form — house details (asked for 'have' / 'sublet')
   const [fRoom, setFRoom]   = useState('');
   const [fOcc, setFOcc]     = useState('');
+  const [fBath, setFBath]   = useState('');
+  const [fFurnished, setFFurnished] = useState('');
+  const [fLease, setFLease] = useState('');
+  const [fAmenities, setFAmenities] = useState<string[]>([]);
   const [fPhone, setFPhone] = useState('');
   // form — roommate preferences (all types; these drive the match %)
   const [fGender, setFGender] = useState('Any');
@@ -115,13 +142,20 @@ export default function RoommatesPage() {
     if (prefill) {
       setFType(prefill.listing_type || 'have');
       setFTitle(prefill.title || ''); setFLoc(prefill.location || '');
-      setFRent(prefill.rent ? String(prefill.rent) : ''); setFDate(prefill.available_from || '');
+      setFRent(prefill.rent ? String(prefill.rent) : '');
+      setFRentMin(prefill.rent_min ? String(prefill.rent_min) : '');
+      setFRentMax(prefill.rent_max ? String(prefill.rent_max) : '');
+      setFDate(prefill.available_from || '');
       setFDesc(prefill.description || '');
       setFRoom(prefill.room_type || ''); setFOcc(prefill.occupancy || ''); setFPhone(prefill.contact_phone || '');
+      setFBath(prefill.bathroom || ''); setFFurnished(prefill.furnished || ''); setFLease(prefill.lease_length || '');
+      setFAmenities(Array.isArray(prefill.amenities) ? prefill.amenities : []);
       setFGender(prefill.gender_preference || 'Any'); setFDiet(prefill.diet || 'No preference');
       setFSmoke(prefill.smoking || 'No preference'); setFPets(prefill.pets || 'No preference');
       setPhotos(Array.isArray(prefill.media) ? prefill.media : []);
     } else {
+      setFRent(''); setFRentMin(''); setFRentMax('');
+      setFBath(''); setFFurnished(''); setFLease(''); setFAmenities([]);
       setPhotos([]);
     }
     setPhotoErr('');
@@ -159,9 +193,18 @@ export default function RoommatesPage() {
     const errs: Record<string, string> = {
       title:       validateText(fTitle, 'Title', { min: 3, max: 60 }),
       location:    validateText(fLoc, 'Location', { min: 2, max: 60 }),
-      rent:        validatePrice(fRent, fType === 'need' ? 'Budget' : 'Rent', { min: 1, max: 20000 }),
       description: validateParagraph(fDesc, 'Description', { max: 600 }),
     };
+    if (fType === 'need') {
+      // "Looking" listings take a budget RANGE
+      errs.rentMin = validatePrice(fRentMin, 'Min budget', { min: 1, max: 20000 });
+      errs.rentMax = validatePrice(fRentMax, 'Max budget', { min: 1, max: 20000 });
+      if (!errs.rentMin && !errs.rentMax && Number(fRentMin) > Number(fRentMax)) {
+        errs.rentMax = 'Max must be greater than or equal to min';
+      }
+    } else {
+      errs.rent = validatePrice(fRent, 'Rent', { min: 1, max: 20000 });
+    }
     if (fPhone.trim()) errs.phone = validateIntlPhone(fPhone);
     const cleaned = Object.fromEntries(Object.entries(errs).filter(([, v]) => v));
     setFieldErrs(cleaned);
@@ -169,12 +212,21 @@ export default function RoommatesPage() {
 
     setSaving(true); setFormErr('');
     const sb = createClient();
+    const isNeed = fType === 'need';
     const { error } = await sb.from('roommate_listings').upsert({
       ...(myListing ? { id: myListing.id } : {}),
       user_id: me.id, listing_type: fType, title: fTitle, location: fLoc,
-      rent: fRent ? Number(fRent) : null, available_from: fDate || null, description: fDesc,
+      // have/sublet → single rent; need → budget range (rent = max, for matching)
+      rent:     isNeed ? (fRentMax ? Number(fRentMax) : null) : (fRent ? Number(fRent) : null),
+      rent_min: isNeed ? (fRentMin ? Number(fRentMin) : null) : null,
+      rent_max: isNeed ? (fRentMax ? Number(fRentMax) : null) : null,
+      available_from: fDate || null, description: fDesc,
       room_type: hasRoom ? (fRoom || null) : null,
       occupancy: hasRoom ? (fOcc || null) : null,
+      bathroom:  hasRoom ? (fBath || null) : null,
+      furnished: hasRoom ? (fFurnished || null) : null,
+      lease_length: hasRoom ? (fLease || null) : null,
+      amenities: hasRoom ? fAmenities : [],
       contact_phone: hasRoom ? (fPhone || null) : null,
       gender_preference: fGender, diet: fDiet, smoking: fSmoke, pets: fPets,
       media: hasRoom ? photos : [],
@@ -251,19 +303,21 @@ export default function RoommatesPage() {
                   <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,#12A150,#5fd08c)', borderRadius: 6 }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12.5, color: '#4c6157', marginBottom: 14 }}>
-                  {l.rent     && <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ color: '#7d9188', display: 'flex' }}><MoneyIcon /></span>${l.rent}/mo</span>}
+                  {(l.rent_min && l.rent_max)
+                    ? <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ color: '#7d9188', display: 'flex' }}><MoneyIcon /></span>Budget ${l.rent_min}–${l.rent_max}/mo</span>
+                    : l.rent && <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ color: '#7d9188', display: 'flex' }}><MoneyIcon /></span>${l.rent}/mo</span>}
                   {l.available_from && <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ color: '#7d9188', display: 'flex' }}><CalIcon /></span>Move-in: {l.available_from}</span>}
                   {l.location && <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ color: '#7d9188', display: 'flex' }}><PinIcon /></span>{l.location}</span>}
                 </div>
                 {(() => {
-                  const chips = [l.room_type, l.occupancy,
+                  const chips = [l.room_type, l.bathroom, l.furnished, l.occupancy, l.lease_length,
                     l.diet !== 'No preference' ? l.diet : null,
                     l.smoking === 'Non-smoker' ? 'Non-smoker' : null,
                     l.pets === 'Pets OK' ? 'Pet-friendly' : l.pets === 'No pets' ? 'No pets' : null,
                   ].filter(Boolean) as string[];
                   return chips.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
-                      {chips.slice(0, 3).map(t => <span key={t} style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100, background: '#E7F1EA', color: '#2E7D5B' }}>{t}</span>)}
+                      {chips.slice(0, 4).map(t => <span key={t} style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100, background: '#E7F1EA', color: '#2E7D5B' }}>{t}</span>)}
                     </div>
                   );
                 })()}
@@ -298,11 +352,23 @@ export default function RoommatesPage() {
               <input value={fLoc} onChange={e => { setFLoc(e.target.value); clearErr('location'); }} placeholder="e.g. Glassboro, NJ" style={inpErr(fieldErrs.location)} maxLength={60} />
               {fieldErrs.location && <div style={fErr}>{fieldErrs.location}</div>}
             </div>
-            <div style={{ marginBottom: 14 }}>
-              <label style={fLbl}>{fType === 'need' ? 'Monthly Budget ($)' : 'Monthly Rent ($)'}</label>
-              <input value={fRent} onChange={e => { setFRent(e.target.value.replace(/[^\d.]/g, '').slice(0, 8)); clearErr('rent'); }} inputMode="decimal" placeholder="e.g. 800" style={inpErr(fieldErrs.rent)} />
-              {fieldErrs.rent && <div style={fErr}>{fieldErrs.rent}</div>}
-            </div>
+            {fType === 'need' ? (
+              <div style={{ marginBottom: 14 }}>
+                <label style={fLbl}>Monthly Budget ($) — min & max</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <input value={fRentMin} onChange={e => { setFRentMin(e.target.value.replace(/[^\d.]/g, '').slice(0, 8)); clearErr('rentMin'); clearErr('rentMax'); }} inputMode="decimal" placeholder="Min e.g. 500" style={inpErr(fieldErrs.rentMin)} />
+                  <span style={{ color: '#7d9188', fontWeight: 700 }}>–</span>
+                  <input value={fRentMax} onChange={e => { setFRentMax(e.target.value.replace(/[^\d.]/g, '').slice(0, 8)); clearErr('rentMax'); }} inputMode="decimal" placeholder="Max e.g. 900" style={inpErr(fieldErrs.rentMax)} />
+                </div>
+                {(fieldErrs.rentMin || fieldErrs.rentMax) && <div style={fErr}>{fieldErrs.rentMin || fieldErrs.rentMax}</div>}
+              </div>
+            ) : (
+              <div style={{ marginBottom: 14 }}>
+                <label style={fLbl}>Monthly Rent ($)</label>
+                <input value={fRent} onChange={e => { setFRent(e.target.value.replace(/[^\d.]/g, '').slice(0, 8)); clearErr('rent'); }} inputMode="decimal" placeholder="e.g. 800" style={inpErr(fieldErrs.rent)} />
+                {fieldErrs.rent && <div style={fErr}>{fieldErrs.rent}</div>}
+              </div>
+            )}
             <div style={{ marginBottom: 14 }}>
               <label style={fLbl}>{fType === 'need' ? 'Move-in Date' : 'Available From'}</label>
               <input value={fDate} onChange={e => setFDate(e.target.value)} type="date" style={inp} />
@@ -313,7 +379,11 @@ export default function RoommatesPage() {
               <div style={{ background: '#F7FAF8', border: '1px solid rgba(18,36,28,0.08)', borderRadius: 14, padding: '14px 14px 4px', marginBottom: 16 }}>
                 <div style={{ fontSize: 11, fontWeight: 800, color: '#0F8A44', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 12 }}>🏠 House details</div>
                 <ChipRow label="Room type" options={['Private room', 'Shared room', 'Entire place']} value={fRoom} set={setFRoom} />
-                <ChipRow label="Apartment size" options={['Studio', '1B1B', '2B1B', '2B2B', '3B+']} value={fOcc} set={setFOcc} />
+                <ChipRow label="Bathroom" options={['Private bath', 'Shared bath']} value={fBath} set={setFBath} />
+                <ChipRow label="Apartment size" options={['Studio', '1 BR', '2 BR', '3 BR', '4 BR+']} value={fOcc} set={setFOcc} />
+                <ChipRow label="Furnished" options={['Furnished', 'Unfurnished', 'Partly furnished']} value={fFurnished} set={setFFurnished} />
+                <ChipRow label="Lease length" options={['Month-to-month', 'Per semester', '6 months', '12 months']} value={fLease} set={setFLease} />
+                <ChipMulti label="Amenities" options={AMENITY_OPTIONS} values={fAmenities} set={setFAmenities} />
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#4c6157', marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.4 }}>Contact phone <span style={{ fontWeight: 500, textTransform: 'none' }}>(optional — shown as a Call button)</span></label>
                   <input value={fPhone} onChange={e => { setFPhone(e.target.value); clearErr('phone'); }} placeholder="+1 (856) 555-0142" type="tel" style={inpErr(fieldErrs.phone)} />
