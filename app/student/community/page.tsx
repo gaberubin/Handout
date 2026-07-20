@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { createCommunityPostAction } from '@/lib/actions/auth';
 import { awardPoints } from '@/lib/points';
 import { Marketplace } from '@/components/community/Marketplace';
+import { getMyCampus } from '@/lib/campus';
 
 /* ── Community page SVG icons ── */
 const PartyIcon  = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V7"/></svg>;
@@ -51,12 +52,15 @@ export default function CommunityPage() {
 
   async function load() {
     const supabase = createClient();
-    const { data } = await supabase
+    const campus = await getMyCampus();
+    let q = supabase
       .from('community_posts')
       .select('*, users:public_profiles(full_name)')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .limit(50);
+    if (campus) q = q.eq('campus', campus);   // campus isolation — only my university
+    const { data } = await q;
     setPosts(data || []);
   }
 
