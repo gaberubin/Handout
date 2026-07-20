@@ -183,6 +183,30 @@ export default function RoommateDetailPage() {
                     <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#12241C', display: 'flex', alignItems: 'center', gap: 6 }}><BedIcon />{listing.room_type}</p>
                   </div>
                 )}
+                {listing.bathroom && (
+                  <div style={{ padding: '10px 14px', background: 'rgba(18,36,28,0.04)', borderRadius: 10, border: '1px solid rgba(18,36,28,0.07)' }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 10, fontWeight: 700, color: '#7d9188', textTransform: 'uppercase', letterSpacing: 0.5 }}>Bathroom</p>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#12241C' }}>{listing.bathroom}</p>
+                  </div>
+                )}
+                {listing.occupancy && (
+                  <div style={{ padding: '10px 14px', background: 'rgba(18,36,28,0.04)', borderRadius: 10, border: '1px solid rgba(18,36,28,0.07)' }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 10, fontWeight: 700, color: '#7d9188', textTransform: 'uppercase', letterSpacing: 0.5 }}>Apartment</p>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#12241C' }}>{listing.occupancy}</p>
+                  </div>
+                )}
+                {listing.furnished && (
+                  <div style={{ padding: '10px 14px', background: 'rgba(18,36,28,0.04)', borderRadius: 10, border: '1px solid rgba(18,36,28,0.07)' }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 10, fontWeight: 700, color: '#7d9188', textTransform: 'uppercase', letterSpacing: 0.5 }}>Furnished</p>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#12241C' }}>{listing.furnished}</p>
+                  </div>
+                )}
+                {listing.lease_length && (
+                  <div style={{ padding: '10px 14px', background: 'rgba(18,36,28,0.04)', borderRadius: 10, border: '1px solid rgba(18,36,28,0.07)' }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 10, fontWeight: 700, color: '#7d9188', textTransform: 'uppercase', letterSpacing: 0.5 }}>Lease</p>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#12241C' }}>{listing.lease_length}</p>
+                  </div>
+                )}
                 {listing.gender_preference && (
                   <div style={{ padding: '10px 14px', background: 'rgba(18,36,28,0.04)', borderRadius: 10, border: '1px solid rgba(18,36,28,0.07)' }}>
                     <p style={{ margin: '0 0 2px', fontSize: 10, fontWeight: 700, color: '#7d9188', textTransform: 'uppercase', letterSpacing: 0.5 }}>Gender pref.</p>
@@ -204,15 +228,26 @@ export default function RoommateDetailPage() {
               </div>
             </div>
 
+            {/* Amenities */}
+            {Array.isArray(listing.amenities) && listing.amenities.length > 0 && (
+              <div style={{ ...card, padding: '20px 22px' }}>
+                <p style={{ fontSize: 11, fontWeight: 800, color: '#7d9188', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 14px' }}>Amenities</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {listing.amenities.map((a: string) => (
+                    <span key={a} style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 12px', borderRadius: 100, background: 'rgba(18,161,80,0.08)', border: '1px solid rgba(18,161,80,0.2)', color: '#0F8A44' }}>✓ {a}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Preferences */}
-            {(listing.diet || listing.smoking || listing.pets || listing.occupancy) && (
+            {(listing.diet || listing.smoking || listing.pets) && (
               <div style={{ ...card, padding: '20px 22px' }}>
                 <p style={{ fontSize: 11, fontWeight: 800, color: '#7d9188', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 14px' }}>Preferences</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {listing.diet && listing.diet !== 'No preference' && <Badge label={listing.diet} ok />}
                   {listing.smoking && listing.smoking !== 'No preference' && <Badge label={listing.smoking === 'Non-smoker' ? 'No smoking' : listing.smoking} ok={listing.smoking === 'Non-smoker'} />}
                   {listing.pets && listing.pets !== 'No preference' && <Badge label={listing.pets === 'No pets' ? 'No pets' : 'Pets OK'} ok={listing.pets !== 'No pets'} />}
-                  {listing.occupancy && listing.occupancy !== 'Any' && <Badge label={listing.occupancy} ok />}
                 </div>
               </div>
             )}
@@ -226,7 +261,9 @@ export default function RoommateDetailPage() {
               <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: '#7d9188', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 {listing.listing_type === 'need' ? 'Budget' : 'Monthly rent'}
               </p>
-              <p style={{ margin: '0 0 6px', fontSize: 38, fontWeight: 800, color: '#12A150', letterSpacing: -2, lineHeight: 1 }}>${listing.rent}</p>
+              {(listing.rent_min && listing.rent_max)
+                ? <p style={{ margin: '0 0 6px', fontSize: 30, fontWeight: 800, color: '#12A150', letterSpacing: -1.5, lineHeight: 1 }}>${listing.rent_min}–${listing.rent_max}</p>
+                : <p style={{ margin: '0 0 6px', fontSize: 38, fontWeight: 800, color: '#12A150', letterSpacing: -2, lineHeight: 1 }}>${listing.rent}</p>}
               <p style={{ margin: 0, fontSize: 12, color: '#7d9188' }}>per month</p>
             </div>
 
