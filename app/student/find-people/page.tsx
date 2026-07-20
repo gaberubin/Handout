@@ -90,7 +90,10 @@ export default function FindPeoplePage() {
       setEditing(true); // first visit → show the form
     }
 
-    const { data: profs } = await sb.from('connection_profiles').select('*').eq('is_active', true).neq('user_id', user.id);
+    // Campus isolation — only match with people from my own university.
+    let profQ = sb.from('connection_profiles').select('*').eq('is_active', true).neq('user_id', user.id);
+    if (uni) profQ = profQ.eq('campus', uni);
+    const { data: profs } = await profQ;
     const list = (profs || []) as CP[];
     setOthers(list);
     if (list.length) {
