@@ -7,7 +7,7 @@ import { processPickedFiles } from '@/lib/imageCompress';
 import { validateParagraph, validatePrice } from '@/lib/validation';
 import { awardPoints } from '@/lib/points';
 import { BETA_MODE } from '@/config/features';
-import { getMyCampus } from '@/lib/campus';
+import { getMyCampus, campusOrFilter } from '@/lib/campus';
 
 /* ── Icons ── */
 const ChatIcon  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
@@ -46,7 +46,7 @@ export function Marketplace({ me }: { me: Me }) {
     const sb = createClient();
     const campus = await getMyCampus();
     let q = sb.from('market_listings').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(60);
-    if (campus) q = q.eq('campus', campus);   // campus isolation — only my university
+    if (campus) q = q.or(campusOrFilter(campus, me?.id));   // campus isolation — my university, unknown-campus rows, and my own listings stay visible
     const { data, error } = await q;
     if (error) { setMigrated(false); setLoading(false); return; }
     const rows = (data || []) as Listing[];
