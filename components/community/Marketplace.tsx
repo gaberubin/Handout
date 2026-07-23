@@ -17,6 +17,7 @@ const ShieldIcon= () => <svg width="15" height="15" viewBox="0 0 24 24" fill="no
 const BoxIcon   = () => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>;
 const BookmarkIcon = ({ filled = false }: { filled?: boolean }) => <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
 const FlagIcon  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>;
+const ImagesIcon = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>;
 
 const CATEGORIES = ['Textbook', 'Furniture', 'Electronics', 'Other'];
 const MAX_PHOTOS = 5;
@@ -37,6 +38,7 @@ export function Marketplace({ me }: { me: Me }) {
   const [showForm, setShowForm] = useState(false);
   const [migrated, setMigrated] = useState(true);
   const [saved, setSaved]       = useState<Set<string>>(new Set());
+  const [active, setActive]     = useState<Listing | null>(null);   // item open in the detail modal
 
   // BETA: any signed-in student can list. Verification stays optional (it still
   // earns the verified badge) — flip BETA_MODE off to require it again.
@@ -104,6 +106,18 @@ export function Marketplace({ me }: { me: Me }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
       {showForm && me && <PostModal me={me} onClose={() => setShowForm(false)} onPosted={() => { setShowForm(false); load(); }} />}
+      {active && (
+        <ItemModal
+          listing={active}
+          seller={sellers[active.user_id] || 'Student'}
+          me={me}
+          saved={saved.has(active.id)}
+          onClose={() => setActive(null)}
+          onToggleSave={() => toggleSave(active.id)}
+          onReport={() => reportListing(active.id)}
+          onRemove={() => { removeListing(active.id); setActive(null); }}
+        />
+      )}
 
       {/* Header + post button */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
@@ -159,15 +173,18 @@ export function Marketplace({ me }: { me: Me }) {
             const mine = me?.id === l.user_id;
             return (
               <div key={l.id} className="ft-card" style={{ overflow:'hidden', display:'flex', flexDirection:'column' }}>
-                <div style={{ height:150, background:'#F1F7F3', position:'relative', flexShrink:0 }}>
+                <div onClick={() => setActive(l)} style={{ height:150, background:'#F1F7F3', position:'relative', flexShrink:0, cursor:'pointer' }}>
                   {img
                     ? <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
                     : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', color:'#B7C6BD' }}><BoxIcon /></div>}
                   <span style={{ position:'absolute', top:10, left:10, fontSize:10.5, fontWeight:800, color:'#0F8A44', background:'rgba(255,255,255,0.94)', borderRadius:100, padding:'3px 9px' }}>{l.category || 'Item'}</span>
+                  {Array.isArray(l.media) && l.media.length > 1 && (
+                    <span style={{ position:'absolute', top:10, right:10, fontSize:10.5, fontWeight:800, color:'#12241C', background:'rgba(255,255,255,0.94)', borderRadius:100, padding:'3px 8px', display:'flex', alignItems:'center', gap:3 }}><ImagesIcon /> {l.media.length}</span>
+                  )}
                 </div>
                 <div style={{ padding:14, display:'flex', flexDirection:'column', gap:8, flex:1 }}>
                   <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
-                    <span style={{ fontSize:14, fontWeight:700, color:'#12241C', lineHeight:1.3 }}>{l.title}</span>
+                    <span onClick={() => setActive(l)} style={{ fontSize:14, fontWeight:700, color:'#12241C', lineHeight:1.3, cursor:'pointer' }}>{l.title}</span>
                     <span className="ft-num" style={{ fontSize:15, color:'#12A150', flexShrink:0 }}>{l.price != null ? `$${Number(l.price).toFixed(0)}` : '—'}</span>
                   </div>
                   {l.description && <p style={{ margin:0, fontSize:12.5, color:'#4C6157', lineHeight:1.5, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{l.description}</p>}
@@ -192,6 +209,72 @@ export function Marketplace({ me }: { me: Me }) {
           })}
         </div>
       ))}
+    </div>
+  );
+}
+
+/* ── Item detail modal — all photos + full description, opened by tapping a card ── */
+function ItemModal({ listing, seller, me, saved, onClose, onToggleSave, onReport, onRemove }: {
+  listing: Listing; seller: string; me: Me; saved: boolean;
+  onClose: () => void; onToggleSave: () => void; onReport: () => void; onRemove: () => void;
+}) {
+  const media = (Array.isArray(listing.media) ? listing.media : []).filter(Boolean);
+  const [idx, setIdx] = useState(0);
+  const mine = me?.id === listing.user_id;
+  const main = media[idx];
+
+  return (
+    <div style={OVERLAY} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background:'#fff', border:'1px solid rgba(18,36,28,0.12)', borderRadius:24, width:'100%', maxWidth:520, maxHeight:'92vh', overflowY:'auto' }}>
+        {/* Main photo */}
+        <div style={{ position:'relative', height:300, background:'#F1F7F3', borderRadius:'24px 24px 0 0', overflow:'hidden' }}>
+          {main
+            ? <img src={main} alt="" style={{ width:'100%', height:'100%', objectFit:'contain' }} />
+            : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', color:'#B7C6BD' }}><BoxIcon /></div>}
+          <span style={{ position:'absolute', top:12, left:12, fontSize:11, fontWeight:800, color:'#0F8A44', background:'rgba(255,255,255,0.94)', borderRadius:100, padding:'4px 10px' }}>{listing.category || 'Item'}</span>
+          <button onClick={onClose} aria-label="Close" style={{ position:'absolute', top:12, right:12, width:32, height:32, borderRadius:'50%', background:'rgba(18,36,28,0.6)', color:'#fff', border:'none', cursor:'pointer', fontSize:18, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center' }}>×</button>
+        </div>
+
+        {/* Thumbnail strip (only when there's more than one photo) */}
+        {media.length > 1 && (
+          <div style={{ display:'flex', gap:8, padding:'12px 20px 0', flexWrap:'wrap' }}>
+            {media.map((m, i) => (
+              <button key={i} onClick={() => setIdx(i)} style={{ width:56, height:56, borderRadius:10, overflow:'hidden', border:`2px solid ${i === idx ? '#12A150' : 'rgba(18,36,28,0.12)'}`, padding:0, cursor:'pointer', background:'#F1F7F3', flexShrink:0 }}>
+                <img src={m} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Details */}
+        <div style={{ padding:'18px 20px 22px', display:'flex', flexDirection:'column', gap:12 }}>
+          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12 }}>
+            <h3 style={{ fontSize:20, fontWeight:800, color:'#12241C', margin:0, lineHeight:1.25 }}>{listing.title}</h3>
+            <span className="ft-num" style={{ fontSize:22, color:'#12A150', flexShrink:0 }}>{listing.price != null ? `$${Number(listing.price).toFixed(0)}` : '—'}</span>
+          </div>
+
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <div style={{ width:26, height:26, borderRadius:'50%', background:'#12241C', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10.5, fontWeight:800, flexShrink:0 }}>{ini(seller)}</div>
+            <span style={{ fontSize:13, color:'#7D9188' }}>{seller}</span>
+          </div>
+
+          {listing.description
+            ? <p style={{ margin:0, fontSize:14, color:'#4C6157', lineHeight:1.6, whiteSpace:'pre-wrap' }}>{listing.description}</p>
+            : <p style={{ margin:0, fontSize:13.5, color:'#9aa8a0', fontStyle:'italic' }}>No description provided.</p>}
+
+          {mine ? (
+            <button onClick={onRemove} className="ft-btn ft-btn-o" style={{ justifyContent:'center', color:'#C25B4E', borderColor:'rgba(194,91,78,0.3)', marginTop:4 }}><TrashIcon /> Remove listing</button>
+          ) : (
+            <div style={{ display:'flex', flexDirection:'column', gap:8, marginTop:4 }}>
+              <Link href={`/student/messages?to=${listing.user_id}&name=${encodeURIComponent(seller)}&msg=${encodeURIComponent(`Hi! Is your "${listing.title}" still available?`)}`} className="ft-btn ft-btn-p" style={{ justifyContent:'center' }}><ChatIcon /> Message seller</Link>
+              <div style={{ display:'flex', gap:8 }}>
+                <button onClick={onToggleSave} className="ft-btn ft-btn-o" style={{ flex:1, justifyContent:'center', color: saved ? '#0F8A44' : undefined, borderColor: saved ? 'rgba(18,161,80,0.4)' : undefined }}><BookmarkIcon filled={saved} /> {saved ? 'Saved' : 'Save'}</button>
+                <button onClick={onReport} className="ft-btn ft-btn-o" style={{ flex:1, justifyContent:'center' }}><FlagIcon /> Report</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
