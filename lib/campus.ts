@@ -1,10 +1,15 @@
 import { createClient } from '@/lib/supabase/client';
+import { CAMPUS_ISOLATION } from '@/config/features';
 
 // Campus isolation: students only see content from their own university.
 // A student's campus is their student_profiles.university. If it's not set,
 // we DON'T isolate (return '') so their app never looks empty — they can still
 // browse and are nudged to set their university in their profile.
+//
+// Master switch: when CAMPUS_ISOLATION is off we return '' unconditionally, so
+// every read that filters on `if (campus)` shows all universities (no scoping).
 export async function getMyCampus(): Promise<string> {
+  if (!CAMPUS_ISOLATION) return '';
   try {
     const sb = createClient();
     const { data: { user } } = await sb.auth.getUser();
