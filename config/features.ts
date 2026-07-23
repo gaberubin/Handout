@@ -31,6 +31,16 @@ export const OTP_ENABLED = false;
 // Supabase, and it reappears with no other changes.
 export const APPLE_SIGNIN_ENABLED = false;
 
+// Campus isolation — when ON, students only see the Marketplace listings,
+// Community posts, Events and Roommate listings from their OWN university.
+// OFF for now: during the early beta there are too few students per campus, so
+// isolating them makes the app look empty ("nobody can see anything"). Every
+// piece of the isolation system stays in place — the campus columns, the
+// set_row_campus trigger, getMyCampus(), sameCampus(), and the per-page filters.
+// Flip this back to true to re-enable university-by-university isolation
+// everywhere with no other code changes.
+export const CAMPUS_ISOLATION = false;
+
 // ── Beta features (fully accessible) ──────────────────────────────────────
 export const BETA_FEATURES = [
   'dashboard',
