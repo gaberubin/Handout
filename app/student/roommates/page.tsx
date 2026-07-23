@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { StudentLayout } from '@/components/layout/StudentLayout';
 import { validateText, validateParagraph, validatePrice, validateIntlPhone } from '@/lib/validation';
 import { sameCampus } from '@/lib/campus';
+import { CAMPUS_ISOLATION } from '@/config/features';
 import { processPickedFiles } from '@/lib/imageCompress';
 
 const MAX_PHOTOS = 7;
@@ -132,7 +133,8 @@ export default function RoommatesPage() {
   }, []);
 
   // Campus isolation — only show listings from my own university.
-  const onCampus = listings.filter(l => sameCampus(l.university, myUni));
+  // Master switch off during beta → show every university's listings.
+  const onCampus = CAMPUS_ISOLATION ? listings.filter(l => sameCampus(l.university, myUni)) : listings;
   const visible = filter === 'all' ? onCampus : onCampus.filter(l => l.listing_type === filter);
 
   const hasRoom = fType === 'have' || fType === 'sublet';
