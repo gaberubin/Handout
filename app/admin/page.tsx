@@ -44,7 +44,9 @@ export default function AdminDashboard() {
       const revenue = (paid || []).reduce((a: number, b: any) => a + (Number(b.total_price) || 0), 0);
       setStats({ students, vendors, bookings, revenue, pending, reviews, referrals });
 
-      const { data: ru } = await sb.from('users').select('*').order('created_at', { ascending: false }).limit(7);
+      // Recent sign-ups: real signups only (students/vendors) — admins are staff,
+      // not signups, so hide them here to match the "Students"/"Vendors" stats above.
+      const { data: ru } = await sb.from('users').select('*').neq('role', 'admin').order('created_at', { ascending: false }).limit(10);
       setUsers(ru || []);
 
       const { data: bkRaw } = await sb.from('bookings').select('*').order('created_at', { ascending: false }).limit(7);
