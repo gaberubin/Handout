@@ -49,6 +49,7 @@ const betaNav = [
   { href: '/student/find-people',     icon: <PeopleIcon />,    label: 'Find Your People' },
   { href: '/student/messages',        icon: <MessagesIcon />,  label: 'Messages' },
   { href: '/student/rewards',         icon: <RewardsIcon />,   label: 'Rewards' },
+  { href: '/student/referral',        icon: <ReferralIcon />,  label: 'Refer & Earn' },
 ];
 // Mirrors the landing page's "What's Next" list — no payment/premium features.
 // NOTE: "Housing" is intentionally excluded — Roommates already covers this
