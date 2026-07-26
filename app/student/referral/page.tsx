@@ -35,9 +35,9 @@ export default function ReferralPage() {
   const referralCode = me ? `REF-${me.id.slice(0, 8).toUpperCase()}` : '';
   const referralLink = me ? `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/signup?ref=${referralCode}` : '';
   const joined = referrals.filter(r => r.joined_at).length;
-  const needed = 3;
-  const progress = Math.min(joined, needed);
-  const earned = Math.floor(joined / needed);
+  const daysEarned = joined * 15;
+  const plusUntil = me?.plus_until ? new Date(me.plus_until) : null;
+  const plusActive = !!plusUntil && plusUntil.getTime() > Date.now();
 
   function copyLink() {
     navigator.clipboard.writeText(referralLink);
@@ -46,9 +46,9 @@ export default function ReferralPage() {
   }
 
   const steps = [
-    { n: 1, Icon: LinkIcon,   title: 'Share your link', desc: 'Send your unique referral link to friends via text, Instagram, or WhatsApp.' },
-    { n: 2, Icon: SignUpIcon, title: 'They sign up', desc: 'Your friend joins Handout using your link. Takes under 2 minutes.' },
-    { n: 3, Icon: GiftIcon,   title: 'You both get rewarded', desc: 'Once 3 friends join, you get 1 month of Plus free. They get 2 weeks free.' },
+    { n: 1, Icon: LinkIcon,   title: 'Share your link or code', desc: 'Send your referral link (or your code) to friends via text, Instagram, or WhatsApp.' },
+    { n: 2, Icon: SignUpIcon, title: 'They sign up & log in', desc: 'Your friend joins Handout with your link. Takes under 2 minutes.' },
+    { n: 3, Icon: GiftIcon,   title: 'You both get Plus — automatically', desc: 'The moment they log in, you get 15 days of Plus and they get 7 days. No codes to type, nothing to claim.' },
   ];
 
   return (
@@ -63,45 +63,34 @@ export default function ReferralPage() {
             Invite friends,<br /><span style={{ color: 'var(--amber)' }}>get Plus free.</span>
           </h1>
           <p style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 0, lineHeight: 1.6 }}>
-            Invite 3 friends to Handout. Once they sign up, you get <strong style={{ color: 'var(--white)' }}>1 month of Plus free</strong>.<br />They get <strong style={{ color: 'var(--white)' }}>2 weeks of Plus free</strong> just for joining.
+            For <strong style={{ color: 'var(--white)' }}>every</strong> friend who joins with your link, you get <strong style={{ color: 'var(--white)' }}>15 days of Plus</strong>.<br />They get <strong style={{ color: 'var(--white)' }}>7 days of Plus</strong> just for joining — applied automatically.
           </p>
         </div>
 
-        {/* Progress tracker */}
-        <div style={{ background: 'var(--navy2)', border: '1px solid var(--border)', borderRadius: 20, padding: '28px 28px', marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>Your progress</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--white)', letterSpacing: -1 }}>
-                {progress}<span style={{ fontSize: 16, color: 'var(--muted)', fontWeight: 400 }}>/{needed} friends joined</span>
-              </div>
+        {/* Your stats */}
+        <div style={{ background: 'var(--navy2)', border: '1px solid var(--border)', borderRadius: 20, padding: '24px 28px', marginBottom: 24, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 140px' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>Friends joined</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--white)', letterSpacing: -1 }}>{joined}</div>
+          </div>
+          <div style={{ flex: '1 1 140px' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>Plus days earned</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: '#12A150', letterSpacing: -1 }}>{daysEarned}</div>
+          </div>
+          {plusActive && (
+            <div style={{ flex: '1 1 180px', background: 'rgba(18,161,80,0.1)', border: '1px solid rgba(18,161,80,0.28)', borderRadius: 14, padding: '12px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#0F8A44', textTransform: 'uppercase', letterSpacing: 1 }}>✦ Plus member</div>
+              <div style={{ fontSize: 13, color: 'var(--light)', marginTop: 2 }}>until {plusUntil!.toLocaleDateString()}</div>
             </div>
-            {earned > 0 && (
-              <div style={{ background: 'rgba(18,161,80,0.12)', border: '1px solid rgba(18,161,80,0.3)', borderRadius: 12, padding: '8px 16px', textAlign: 'center' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#12A150', textTransform: 'uppercase', letterSpacing: 1 }}>Earned</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#12A150' }}>{earned} mo free</div>
-              </div>
-            )}
-          </div>
-          {/* Progress bar */}
-          <div style={{ height: 8, background: 'rgba(18,36,28,0.06)', borderRadius: 100, overflow: 'hidden', marginBottom: 10 }}>
-            <div style={{ height: '100%', width: `${(progress / needed) * 100}%`, background: 'linear-gradient(90deg,var(--amber),#12A150)', borderRadius: 100, transition: 'width 0.6s ease' }} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            {Array.from({ length: needed }, (_, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: i < progress ? '#12A150' : 'var(--muted)', fontWeight: 600 }}>
-                <span style={{ width: 18, height: 18, borderRadius: '50%', background: i < progress ? 'rgba(18,161,80,0.2)' : 'rgba(18,36,28,0.06)', border: `1px solid ${i < progress ? '#12A150' : 'rgba(18,36,28,0.09)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>
-                  {i < progress ? '✓' : i + 1}
-                </span>
-                Friend {i + 1} {i < progress ? '✓' : ''}
-              </div>
-            ))}
-          </div>
+          )}
         </div>
 
         {/* Referral link */}
         <div style={{ background: 'var(--navy2)', border: '1px solid var(--border)', borderRadius: 20, padding: '24px 28px', marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>Your referral link</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', letterSpacing: 1, textTransform: 'uppercase' }}>Your referral link</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--light)' }}>Code: <span style={{ fontFamily: 'monospace', color: 'var(--amber)', letterSpacing: 1 }}>{loading ? '—' : referralCode}</span></div>
+          </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <div style={{ flex: 1, height: 48, background: 'rgba(18,36,28,0.04)', border: '1px solid rgba(18,36,28,0.09)', borderRadius: 12, padding: '0 16px', display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--light)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontFamily: 'monospace' }}>
               {loading ? '—' : referralLink}

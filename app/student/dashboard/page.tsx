@@ -39,6 +39,11 @@ export default function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
+  // Banked Plus days (earned via referrals). Plus perks aren't live yet, so we
+  // tell the user their days are saved and will unlock when Plus launches.
+  const plusUntil = me?.plus_until ? new Date(me.plus_until) : null;
+  const plusDaysLeft = plusUntil ? Math.max(0, Math.ceil((plusUntil.getTime() - Date.now()) / 86400000)) : 0;
+
   return (
     <StudentLayout title="Dashboard">
       <div className="page-enter" style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -52,6 +57,21 @@ export default function DashboardPage() {
             <BetaBadge compact />
           </div>
         </div>
+
+        {me && plusDaysLeft > 0 && (
+          <div style={{ marginBottom: 22, background: '#fff', border: '1px solid rgba(226,138,30,0.32)', borderRadius: 18, padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(226,138,30,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 22 }}>🎁</div>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#12241C', marginBottom: 3 }}>
+                You’ve banked {plusDaysLeft} {plusDaysLeft === 1 ? 'day' : 'days'} of Plus 🔒
+              </div>
+              <div style={{ fontSize: 13, color: '#4c6157', lineHeight: 1.55 }}>
+                Plus perks aren’t unlocked yet — everything on Handout is free during the beta. Your days are <strong style={{ color: '#12241C' }}>saved</strong>, and the moment we launch Plus they’ll activate automatically. Refer more friends to stack extra days.
+              </div>
+            </div>
+            <Link href="/student/referral" className="ft-btn ft-btn-o" style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>Refer &amp; earn</Link>
+          </div>
+        )}
 
         {me && me.verification_status !== 'approved' && !me.is_verified && (
           <div style={{ marginBottom: 22, background: 'linear-gradient(120deg,#12A150,#0d7a3d)', borderRadius: 18, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap', color: '#fff' }}>

@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { captureRefFromUrl } from '@/lib/referral';
 import { UniversitySelect } from '@/components/ui/UniversitySelect';
 import { MajorSelect } from '@/components/ui/MajorSelect';
 import { PhoneInput } from '@/components/ui/PhoneInput';
@@ -24,6 +25,10 @@ export default function SignupPage() {
   const [agreed, setAgreed]         = useState(false);
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState('');
+
+  // Remember an incoming referral code (?ref=REF-…) so it survives signup +
+  // email confirm + any OAuth redirect; it's claimed once the user is inside.
+  useEffect(() => { captureRefFromUrl(); }, []);
 
   // OTP step
   const [step, setStep]         = useState<'form'|'otp'>('form');

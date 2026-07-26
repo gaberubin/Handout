@@ -2,6 +2,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { FeedbackButton } from '@/components/beta/FeedbackButton';
+import { ReferralClaimer } from '@/components/referral/ReferralClaimer';
 
 export function StudentLayout({ children, title, noPad }: { children: React.ReactNode; title: string; noPad?: boolean }) {
   return (
@@ -13,6 +14,7 @@ export function StudentLayout({ children, title, noPad }: { children: React.Reac
       </div>
       <MobileBottomNav />
       <FeedbackButton />
+      <ReferralClaimer />
     </div>
   );
 }

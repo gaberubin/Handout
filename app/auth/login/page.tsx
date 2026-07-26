@@ -16,6 +16,8 @@ export default function LoginPage() {
   // Surface errors handed back by /auth/callback (e.g. a non-.edu Google
   // account) — otherwise the user is bounced here with no explanation.
   useEffect(() => {
+    // Also stash any referral code that arrived on the login URL.
+    import('@/lib/referral').then(m => m.captureRefFromUrl());
     const code = new URLSearchParams(window.location.search).get('error');
     if (!code) return;
     setError(
