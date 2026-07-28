@@ -88,6 +88,7 @@ export default function LandingPage() {
           <Link href="#available" className="nav-link">Features</Link>
           {!BETA_MODE && <Link href="#services" className="nav-link">Services</Link>}
           {!BETA_MODE && <Link href="#pricing"  className="nav-link">Pricing</Link>}
+          <Link href="/explore" className="nav-link">Browse listings</Link>
           <Link href="/auth/login"  className="btn btn-outline btn-sm">Log in</Link>
           <Link href="/auth/signup" className="btn btn-primary btn-sm">Sign up free</Link>
         </div>
@@ -123,8 +124,8 @@ export default function LandingPage() {
               <Link href="/auth/signup" className="btn btn-primary btn-xl" style={{ gap:10 }}>
                 Join Beta →
               </Link>
-              <Link href="#available" className="btn btn-outline btn-xl">
-                Learn More
+              <Link href="/explore" className="btn btn-outline btn-xl">
+                Browse listings
               </Link>
             </div>
             <Link href="/auth/login" style={{ fontSize:13, color:'var(--muted)', display:'flex', alignItems:'center', gap:6 }}>
