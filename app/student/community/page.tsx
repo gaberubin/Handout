@@ -241,8 +241,7 @@ export default function CommunityPage() {
             <CardHeader title={<span style={{ display:'inline-flex', alignItems:'center', gap:6 }}><ChartIcon /> Community Stats</span>} />
             <div className="flex flex-col gap-2 text-sm">
               {[
-                // Member count intentionally hidden during the early beta — a low
-                // number discourages sign-ups. Restore the row when it's a selling point.
+                { label: 'Members', value: memberCount != null ? memberCount.toLocaleString() : '—' },
                 { label: 'Posts', value: ready ? posts.length.toString() : '—' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between text-[13px]">

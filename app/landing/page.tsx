@@ -1,7 +1,6 @@
 'use client';
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { LiveStats } from '@/components/motion/LiveStats';
 import { BETA_MODE } from '@/config/features';
 import { BetaBadge } from '@/components/beta/BetaBadge';
 
@@ -195,7 +194,9 @@ export default function LandingPage() {
           <em style={{ fontStyle:'italic', fontWeight:300, color:'var(--amber)' }}>harder than it should be</em>{' '}
           — finding a roommate, meeting people, and building your campus community shouldn&apos;t take weeks of googling.
         </p>
-        <LiveStats />
+        {/* LiveStats hidden during the early beta — real counts render as
+            "0+ Students on Handout", which discourages sign-ups. The component
+            is preserved; restore <LiveStats /> once the numbers help us. */}
       </section>
 
       {/* ── FEATURES ── */}
