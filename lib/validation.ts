@@ -16,11 +16,18 @@ export function validateEmail(v: string): string {
   return '';
 }
 
-/** Students must sign up with a .edu university email address. */
+/**
+ * Students must sign up with a .edu university email address.
+ * BETA: the .edu requirement is OFF (REQUIRE_EDU_EMAIL=false) — too many students
+ * bounced at the wall, so any valid email (Gmail etc.) is accepted. The rule is
+ * preserved below; flip the flag to true to re-require .edu with no other changes.
+ */
+export const REQUIRE_EDU_EMAIL = false;
+
 export function validateEduEmail(v: string): string {
   const generic = validateEmail(v);
   if (generic) return generic;
-  if (!/\.edu$/i.test(v.trim())) return 'Students must use a .edu university email address';
+  if (REQUIRE_EDU_EMAIL && !/\.edu$/i.test(v.trim())) return 'Students must use a .edu university email address';
   return '';
 }
 export function normalizePhone(v: string): string { return v.replace(/\D/g, '').slice(0, 10); }
