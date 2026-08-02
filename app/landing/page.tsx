@@ -1,5 +1,6 @@
 'use client';
 import { useEffect } from 'react';
+import { LiveListings } from '@/components/landing/LiveListings';
 import Link from 'next/link';
 import { BETA_MODE } from '@/config/features';
 import { BetaBadge } from '@/components/beta/BetaBadge';
@@ -94,7 +95,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="lp-hero" style={{ minHeight:'100vh', display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:'0 48px 80px', position:'relative', overflow:'hidden' }}>
+      <section className="lp-hero" style={{ minHeight:'92vh', display:'flex', flexDirection:'column', justifyContent:'center', padding:'80px 48px', position:'relative', overflow:'hidden' }}>
         <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
           <div style={{ position:'absolute', width:700, height:700, background:'radial-gradient(circle,rgba(18,161,80,0.18) 0%,transparent 70%)', top:-80, right:-80, borderRadius:'50%', animation:'float1 8s ease-in-out infinite' }}/>
           <div style={{ position:'absolute', width:500, height:500, background:'radial-gradient(circle,rgba(37,99,235,0.10) 0%,transparent 70%)', bottom:-40, left:120, borderRadius:'50%', animation:'float2 10s ease-in-out infinite' }}/>
@@ -116,7 +117,7 @@ export default function LandingPage() {
 
         <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', position:'relative', zIndex:2, gap:24, flexWrap:'wrap' }}>
           <p style={{ maxWidth:460, fontSize:17, color:'var(--light)', lineHeight:1.65, animation:'fadeUpIn 0.9s ease 0.8s both' }}>
-            Handout Beta helps students find roommates, meet new people, discover campus events, buy and sell items, and build their campus community.
+            Find a roommate, sell your textbooks, and meet people on your campus — all in one place. Free for students, no fees, no commission.
           </p>
           <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:14, animation:'fadeUpIn 0.9s ease 1s both' }}>
             <div style={{ display:'flex', gap:12, flexWrap:'wrap', justifyContent:'flex-end' }}>
@@ -133,11 +134,20 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div style={{ position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:8, zIndex:2, animation:'fadeUpIn 0.9s ease 1.4s both' }}>
-          <span style={{ fontSize:9, letterSpacing:3, textTransform:'uppercase', color:'var(--muted)', fontWeight:600 }}>Scroll</span>
-          <div style={{ width:1, height:52, background:'linear-gradient(to bottom,var(--amber),transparent)', animation:'blink 2s ease-in-out infinite' }}/>
+        {/* Quick "what's inside" chips — communicates the value at a glance.
+            (Replaces the old absolutely-positioned Scroll cue, which overlapped
+            the CTA buttons once they wrapped.) */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:10, marginTop:40, position:'relative', zIndex:2, animation:'fadeUpIn 0.9s ease 1.2s both' }}>
+          {['🏠 Roommates & sublets','📚 Marketplace','💚 Campus Connect','🎉 Events','⭐ Find your people'].map(chip => (
+            <span key={chip} style={{ display:'inline-flex', alignItems:'center', gap:7, background:'#ffffff', border:'1px solid var(--border)', borderRadius:100, padding:'9px 16px', fontSize:13.5, fontWeight:600, color:'var(--light)' }}>
+              {chip}
+            </span>
+          ))}
         </div>
       </section>
+
+      {/* ── LIVE LISTINGS (show the product before any wall) ── */}
+      <LiveListings />
 
       {/* ── MARQUEE ── */}
       <div style={{ borderTop:'1px solid var(--border)', borderBottom:'1px solid var(--border)', padding:'18px 0', overflow:'hidden', background:'#ffffff' }}>
@@ -150,37 +160,42 @@ export default function LandingPage() {
 
       {/* ── AVAILABLE TODAY / COMING SOON (Beta) ── */}
       <section id="available" className="lp-section" style={{ padding:'96px 48px 40px', maxWidth:1280, margin:'0 auto' }}>
-        <div className="section-label"><div className="section-label-line"/><span className="section-label-text">The Beta</span><span className="section-label-num">·</span></div>
-        <div className="lp-two-col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20 }}>
-          {/* Available today */}
-          <div data-sr className="ft-card" style={{ padding:'32px 30px' }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(18,161,80,0.10)', border:'1px solid rgba(18,161,80,0.22)', borderRadius:100, padding:'5px 13px', marginBottom:18 }}>
-              <span style={{ width:7, height:7, background:'var(--amber)', borderRadius:'50%' }}/>
-              <span style={{ fontSize:10.5, fontWeight:800, letterSpacing:2, textTransform:'uppercase', color:'#0F8A44' }}>Available Today</span>
-            </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              {[['🏠','Roommate Matching'],['👥','Campus Connect'],['💬','Community'],['🛍','Marketplace'],['🎉','Events'],['🤝','Find Your People'],['✉️','Messaging'],['🏆','Rewards']].map(([e,f]) => (
-                <div key={f} style={{ display:'flex', alignItems:'center', gap:12 }}>
-                  <span style={{ fontSize:18, width:22, textAlign:'center', flexShrink:0 }}>{e}</span>
-                  <span style={{ fontSize:15.5, fontWeight:600, color:'var(--white)' }}>{f}</span>
-                </div>
-              ))}
-            </div>
+        <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:20, flexWrap:'wrap', marginBottom:26 }}>
+          <div>
+            <div className="section-label" style={{ marginBottom:10 }}><div className="section-label-line"/><span className="section-label-text">The Beta</span></div>
+            <h2 style={{ fontFamily:"'Bricolage Grotesque', sans-serif", fontSize:'clamp(30px,4vw,50px)', fontWeight:800, letterSpacing:-1.6, lineHeight:1.05, margin:0, color:'var(--white)' }}>
+              Live today. All free.
+            </h2>
           </div>
-          {/* What's Next */}
-          <div data-sr className="ft-card" style={{ padding:'32px 30px' }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(124,107,209,0.10)', border:'1px solid rgba(124,107,209,0.22)', borderRadius:100, padding:'5px 13px', marginBottom:18 }}>
-              <span style={{ fontSize:10.5, fontWeight:800, letterSpacing:2, textTransform:'uppercase', color:'#7C6BD1' }}>What&apos;s Next</span>
+          <Link href="/auth/signup" className="btn btn-primary">Join Beta →</Link>
+        </div>
+
+        {/* Live features — 4-across tile grid */}
+        <div className="rg-4" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, marginBottom:34 }}>
+          {[
+            ['🏠','Roommate Matching','Match on budget, lifestyle and move-in date.'],
+            ['💚','Campus Connect','University-locked matching to meet students.'],
+            ['📚','Marketplace','Buy and sell textbooks and dorm items.'],
+            ['💬','Community','Ask questions and get campus answers fast.'],
+            ['🎉','Events','See what’s on and RSVP in one tap.'],
+            ['⭐','Find Your People','Study buddies, gym partners, teammates.'],
+            ['✉️','Messaging','Chat directly with any student.'],
+            ['🏆','Rewards','Earn points for posting and referring.'],
+          ].map(([e,title,desc]) => (
+            <div key={title} data-sr className="ft-card" style={{ padding:'20px 18px', display:'flex', flexDirection:'column', gap:8 }}>
+              <span style={{ fontSize:24, lineHeight:1 }}>{e}</span>
+              <span style={{ fontSize:15, fontWeight:800, color:'var(--white)', letterSpacing:-0.2 }}>{title}</span>
+              <span style={{ fontSize:13, color:'var(--muted)', lineHeight:1.5 }}>{desc}</span>
             </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              {[['🍱','Homemade Food'],['🚗','Airport Pickup'],['💼','Student Jobs'],['🧹','Student Services'],['🎓','Tutoring'],['✨','More Features']].map(([e,f]) => (
-                <div key={f} style={{ display:'flex', alignItems:'center', gap:12 }}>
-                  <span style={{ fontSize:18, width:22, textAlign:'center', flexShrink:0 }}>{e}</span>
-                  <span style={{ fontSize:15.5, fontWeight:600, color:'var(--muted)' }}>{f}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
+        </div>
+
+        {/* What's next — compact chips, not a tall list */}
+        <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
+          <span style={{ fontSize:10.5, fontWeight:800, letterSpacing:2, textTransform:'uppercase', color:'#7C6BD1', background:'rgba(124,107,209,0.10)', border:'1px solid rgba(124,107,209,0.22)', borderRadius:100, padding:'6px 13px' }}>What&apos;s Next</span>
+          {['🍱 Homemade Food','🚗 Airport Pickup','💼 Student Jobs','🧹 Student Services','🎓 Tutoring'].map(f => (
+            <span key={f} style={{ display:'inline-flex', alignItems:'center', gap:6, background:'#ffffff', border:'1px solid var(--border)', borderRadius:100, padding:'8px 15px', fontSize:13.5, fontWeight:600, color:'var(--muted)' }}>{f}</span>
+          ))}
         </div>
       </section>
 
