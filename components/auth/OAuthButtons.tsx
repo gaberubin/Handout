@@ -25,6 +25,13 @@ export function OAuthButtons({ mode = 'login', role }: OAuthButtonsProps) {
   async function signInWith(provider: 'google' | 'apple') {
     setError('');
     setLoadingProvider(provider);
+    // Remember the chosen role across the OAuth round trip. Supabase only keeps
+    // our ?role= query string when the exact URL is allow-listed, so this
+    // localStorage handoff (read by <VendorRoleClaimer />) is the reliable path.
+    try {
+      if (role === 'vendor') localStorage.setItem('handout_signup_role', 'vendor');
+      else localStorage.removeItem('handout_signup_role');
+    } catch { /* storage disabled — falls back to the ?role= param */ }
     const supabase = createClient();
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider,
