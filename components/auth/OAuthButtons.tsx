@@ -7,9 +7,16 @@ import { APPLE_SIGNIN_ENABLED } from '@/config/features';
 interface OAuthButtonsProps {
   /** 'login' shows "Sign in with …", 'signup' shows "Sign up with …" */
   mode?: 'login' | 'signup';
+  /**
+   * Role the user picked on the signup form. OAuth carries no user metadata of
+   * our own, so without this a "Sign up with Google" as Vendor silently became a
+   * student (handle_new_user defaults to 'student'). We pass it to /auth/callback
+   * which applies it to brand-new accounts only.
+   */
+  role?: 'student' | 'vendor';
 }
 
-export function OAuthButtons({ mode = 'login' }: OAuthButtonsProps) {
+export function OAuthButtons({ mode = 'login', role }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | null>(null);
   const [error, setError] = useState('');
 
@@ -22,8 +29,10 @@ export function OAuthButtons({ mode = 'login' }: OAuthButtonsProps) {
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        // The callback route handles session exchange + role-based routing
-        redirectTo: `${window.location.origin}/auth/callback`,
+        // The callback route handles session exchange + role-based routing.
+        // `role` is only sent when signing up as a vendor, so the callback can
+        // apply it to the newly-created account.
+        redirectTo: `${window.location.origin}/auth/callback${role === 'vendor' ? '?role=vendor' : ''}`,
         queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined,
       },
     });

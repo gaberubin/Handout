@@ -29,6 +29,21 @@ export async function GET(request: Request) {
 
       // Otherwise route by role + verification status
       const uid = data.session.user.id;
+
+      // OAuth carries no metadata of ours, so a "Sign up with Google" as Vendor
+      // lands here as a default 'student'. If the signup form asked for vendor,
+      // apply it — but ONLY to a just-created account, so replaying this URL can
+      // never flip an established student account.
+      if (searchParams.get('role') === 'vendor') {
+        try {
+          const createdAt = new Date(data.session.user.created_at as string).getTime();
+          const isBrandNew = Number.isFinite(createdAt) && (Date.now() - createdAt) < 10 * 60 * 1000;
+          if (isBrandNew) {
+            await supabase.from('users').update({ role: 'vendor' }).eq('id', uid).eq('role', 'student');
+          }
+        } catch { /* non-fatal — fall through to normal routing */ }
+      }
+
       let role = 'student', status = 'unsubmitted';
       try {
         const { data: prof } = await supabase
@@ -41,7 +56,12 @@ export async function GET(request: Request) {
       } catch { /* use defaults */ }
 
       if (role === 'admin') return NextResponse.redirect(`${origin}/admin/users`);
-      if (role === 'vendor' || role === 'provider') return NextResponse.redirect(`${origin}/vendor/dashboard`);
+      if (role === 'vendor' || role === 'provider') {
+        // A vendor who just signed up has no business profile yet — send them to
+        // onboarding first; returning vendors go straight to the dashboard.
+        const justSignedUp = searchParams.get('role') === 'vendor';
+        return NextResponse.redirect(`${origin}${justSignedUp ? '/vendor/onboarding' : '/vendor/dashboard'}`);
+      }
       // In Beta, ID verification is optional — new Google/Apple users go straight
       // to the dashboard (the "Become Verified" card is available there).
       // Outside Beta, students must pass verification first.

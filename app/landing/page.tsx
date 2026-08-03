@@ -200,11 +200,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── INTRO ── */}
-      <section className="lp-section" style={{ padding:'56px 48px 80px', maxWidth:1280, margin:'0 auto' }}>
+      <section className="lp-section" style={{ padding:'56px 48px 64px', maxWidth:1280, margin:'0 auto' }}>
         <div className="section-label">
-          <div className="section-label-line"/><span className="section-label-text">About</span><span className="section-label-num">01</span>
+          <div className="section-label-line"/><span className="section-label-text">About</span>
         </div>
-        <p data-sr style={{ fontFamily:"'Bricolage Grotesque', sans-serif", fontSize:'clamp(32px,4.5vw,62px)', fontWeight:500, lineHeight:1.12, letterSpacing:-2, maxWidth:960 }}>
+        <p data-sr style={{ fontFamily:"'Bricolage Grotesque', sans-serif", fontSize:'clamp(26px,3.2vw,44px)', fontWeight:500, lineHeight:1.15, letterSpacing:-1.4, maxWidth:900 }}>
           We built Handout because being a student far from home is{' '}
           <em style={{ fontStyle:'italic', fontWeight:300, color:'var(--amber)' }}>harder than it should be</em>{' '}
           — finding a roommate, meeting people, and building your campus community shouldn&apos;t take weeks of googling.
@@ -214,22 +214,9 @@ export default function LandingPage() {
             is preserved; restore <LiveStats /> once the numbers help us. */}
       </section>
 
-      {/* ── FEATURES ── */}
-      <section id="features" className="lp-section" style={{ padding:'60px 48px 100px', maxWidth:1280, margin:'0 auto' }}>
-        <div className="section-label"><div className="section-label-line"/><span className="section-label-text">Features</span><span className="section-label-num">02</span></div>
-        <div className="lp-grid-3" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
-          {features.map((f,i) => (
-            <div key={i} className={`bento-card sr ${f.delay}`} data-sr style={{ minHeight:220 }}>
-              <div style={{ display:'inline-flex', alignItems:'center', gap:8, marginBottom:14 }}>
-                <span style={{ display:'inline-flex', color:'var(--amber)' }}><f.Icon /></span>
-                <div className="pill pill-amber">{f.tag}</div>
-              </div>
-              <div style={{ fontFamily:"'Bricolage Grotesque', sans-serif", fontSize:22, fontWeight:800, letterSpacing:-0.5, marginBottom:10, color:'var(--white)' }}>{f.title}</div>
-              <div style={{ fontSize:14, color:'var(--light)', lineHeight:1.65 }}>{f.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* ── FEATURES ── REMOVED from the page: it duplicated the "Live today"
+          tile grid above, which says the same thing more compactly. The
+          `features` array is preserved above if we ever want this back. */}
 
       {/* ── CAMPUS CONNECT ── */}
       <section className="lp-section" style={{ padding:'0 48px 100px', maxWidth:1280, margin:'0 auto' }}>
@@ -351,26 +338,28 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
+      {/* ── WHY HANDOUT ──
+          Replaces the old Testimonials block, whose quotes were placeholder
+          people rather than real students. Invented reviews are both misleading
+          and easy to spot on a small campus, so this states real facts about the
+          product instead. Restore testimonials here once we have genuine,
+          permission-given quotes from actual users. */}
       <section className="lp-section" style={{ padding:'80px 48px 100px', maxWidth:1280, margin:'0 auto', borderTop:'1px solid var(--border)' }}>
-        <div className="section-label"><div className="section-label-line"/><span className="section-label-text">Testimonials</span><span className="section-label-num">05</span></div>
-        <h2 data-sr style={{ fontFamily:"'Bricolage Grotesque', sans-serif", fontSize:'clamp(48px,6vw,80px)', fontWeight:800, letterSpacing:-3, lineHeight:1, marginBottom:52 }}>
-          Students <em style={{ fontStyle:'italic', fontWeight:300, color:'var(--amber)' }}>love</em> Handout.
+        <div className="section-label"><div className="section-label-line"/><span className="section-label-text">Why Handout</span></div>
+        <h2 data-sr style={{ fontFamily:"'Bricolage Grotesque', sans-serif", fontSize:'clamp(36px,5vw,64px)', fontWeight:800, letterSpacing:-2.5, lineHeight:1.02, marginBottom:40, color:'var(--white)' }}>
+          Built for students,<br />not for advertisers.
         </h2>
-        <div className="lp-grid-3" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:20 }}>
-          {testimonials.map((t,i) => (
-            <div key={i} data-sr className={`sr d${i+1}`} style={{ background:'var(--navy2)', border:'1px solid var(--border)', borderRadius:20, padding:36, transition:'border-color 0.3s' }}
-              onMouseEnter={e=>(e.currentTarget as HTMLElement).style.borderColor='rgba(18,161,80,0.25)'}
-              onMouseLeave={e=>(e.currentTarget as HTMLElement).style.borderColor='var(--border)'}>
-              <div style={{ display:'flex', gap:3, marginBottom:18 }}>{[1,2,3,4,5].map(n=><span key={n} style={{ display:'inline-flex', color:'var(--amber)' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>)}</div>
-              <p style={{ fontFamily:"'Bricolage Grotesque', sans-serif", fontSize:18, fontWeight:500, lineHeight:1.5, color:'var(--white)', marginBottom:24, fontStyle:'italic' }}>{t.quote}</p>
-              <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                <div style={{ width:40, height:40, borderRadius:'50%', background:t.bg, color:t.fg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700 }}>{t.initials}</div>
-                <div>
-                  <div style={{ fontSize:14, fontWeight:600, color:'var(--white)' }}>{t.name}</div>
-                  <div style={{ fontSize:12, color:'var(--muted)' }}>{t.uni}</div>
-                </div>
-              </div>
+        <div className="rg-4" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
+          {[
+            ['🎓','Students only','Sign up with your university and connect with people on your campus.'],
+            ['🆓','Free in beta','No fees, no commission, no subscription. Everything is free right now.'],
+            ['🔒','You control your data','No selling your info to advertisers. Delete your account any time.'],
+            ['🤝','No middleman','Deal directly with other students — Handout never takes a cut.'],
+          ].map(([e,title,desc]) => (
+            <div key={title} data-sr className="ft-card" style={{ padding:'24px 20px', display:'flex', flexDirection:'column', gap:9 }}>
+              <span style={{ fontSize:26, lineHeight:1 }}>{e}</span>
+              <span style={{ fontSize:16, fontWeight:800, color:'var(--white)', letterSpacing:-0.3 }}>{title}</span>
+              <span style={{ fontSize:13.5, color:'var(--muted)', lineHeight:1.55 }}>{desc}</span>
             </div>
           ))}
         </div>

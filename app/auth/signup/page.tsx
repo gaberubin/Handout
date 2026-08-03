@@ -285,7 +285,7 @@ export default function SignupPage() {
             ))}
           </div>
 
-          <OAuthButtons mode="signup" />
+          <OAuthButtons mode="signup" role={role} />
 
           {error && <div style={{ background:'rgba(220,38,38,0.1)', border:'1px solid rgba(220,38,38,0.25)', borderRadius:10, padding:'12px 14px', fontSize:13, color:'#C25B4E', marginBottom:16 }}>{error}</div>}
 
