@@ -23,6 +23,8 @@ export default function LoginPage() {
     setError(
       code === 'edu_required'
         ? 'Handout is for students — please sign in with your university .edu email address.'
+        : code === 'link_expired'
+        ? 'That confirmation link has expired or was already used. Please sign in below, or sign up again to get a new link.'
         : code === 'oauth_failed'
         ? 'We could not complete that sign-in. Please try again.'
         : 'Sign-in did not complete. Please try again.'

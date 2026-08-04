@@ -74,7 +74,13 @@ export default function SignupPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
-      options: { data: { full_name: fullName, role } },
+      options: {
+        data: { full_name: fullName, role },
+        // Without this, Supabase points the confirmation email at the project's
+        // Site URL, which drops the auth token and dumps the student back on the
+        // login page. Send them through our callback so the session is created.
+        emailRedirectTo: `${window.location.origin}/auth/callback${role === 'vendor' ? '?role=vendor' : ''}`,
+      },
     });
 
     if (signUpError) { setError(signUpError.message); setLoading(false); return; }
