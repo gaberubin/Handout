@@ -119,9 +119,12 @@ export default function RoommateDetailPage() {
           {/* LEFT COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            {/* Photo gallery */}
+            {/* Photo gallery — only when there ARE photos. "Looking for a room"
+                listings have no place to show, so an empty grey placeholder was
+                just dead space; those listings now lead with their details. */}
+            {images.length > 0 && (
             <div style={{ ...card, overflow: 'hidden', padding: 0 }}>
-              {images.length > 0 ? (
+              {(
                 <div style={{ position: 'relative' }}>
                   <img src={images[imgIdx].url} alt="" style={{ width: '100%', height: 340, objectFit: 'cover', display: 'block' }} />
                   {images.length > 1 && (
@@ -138,12 +141,9 @@ export default function RoommateDetailPage() {
                     </>
                   )}
                 </div>
-              ) : (
-                <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(18,36,28,0.12)', background: 'rgba(18,36,28,0.04)' }}>
-                  <ImgIcon />
-                </div>
               )}
             </div>
+            )}
 
             {/* Title + type */}
             <div style={card}>
