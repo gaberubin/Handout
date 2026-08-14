@@ -55,7 +55,6 @@ const LOCKED_FEATURES = [
 
 // Preserved-but-not-yet-live services (mirrors config/features COMING_SOON).
 const SOON_FEATURES = [
-  { emoji:'🍱', title:'Homemade Food' },
   { emoji:'🚗', title:'Airport Pickup' },
   { emoji:'💼', title:'Student Jobs' },
   { emoji:'🧹', title:'Student Services' },

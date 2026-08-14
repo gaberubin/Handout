@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { StudentLayout } from '@/components/layout/StudentLayout';
 import { fetchUserPlan, applyDiscount, type UserPlan } from '@/lib/plan-discounts';
 import { useCart } from '@/lib/cart-store';
+import { QuickOrderModal } from '@/components/food/QuickOrderModal';
 
 const REVIEW_DELAY_MS = 30 * 60 * 1000; // 30 minutes
 
@@ -244,7 +245,7 @@ function PlanCard({
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             transition: 'all 0.2s',
           }}>
-          {added ? <><CheckIcon /> Added!</> : inCart ? <><CartIcon /> In Cart — View</> : <><PlusIcon /> Add to Cart</>}
+          {added ? <><CheckIcon /> Opening…</> : <><PlusIcon /> Order now</>}
         </button>
       </div>
     </div>
@@ -260,6 +261,8 @@ export default function VendorDetailPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [plan, setPlan] = useState<UserPlan>('free');
   const [showReviewModal, setShowReviewModal] = useState(false);
+  // Simple beta ordering (quantity / time / address) — replaces cart + checkout.
+  const [orderPlan, setOrderPlan] = useState<{ name: string; price: number | null } | null>(null);
   const [reviewPrompt, setReviewPrompt] = useState(false); // banner nudge
   const { addItem, hasItem, count: cartCount } = useCart();
 
@@ -339,19 +342,18 @@ export default function VendorDetailPage() {
   const cartIdWeek  = `tiffin-${id}-week`;
   const cartIdMonth = `tiffin-${id}-month`;
 
-  function addToCart(type: 'meal' | 'week' | 'monthly') {
+  // BETA: ordering is a direct request to the cook — no cart, no checkout, no
+  // payment step. The student picks quantity/time/address and the vendor is
+  // notified instantly. (The cart flow is preserved in lib/cart-store for when
+  // in-app payments launch.)
+  function openOrder(type: 'meal' | 'week' | 'monthly') {
     const map = {
-      meal:    { id: cartIdMeal,  price: mealDisc.discounted,  original: mealPrice,  suffix: '/meal', label: `${listing.name} (per meal)` },
-      week:    { id: cartIdWeek,  price: weekDisc.discounted,  original: weekPrice,  suffix: '/wk',   label: `${listing.name} (weekly)` },
-      monthly: { id: cartIdMonth, price: monthDisc.discounted, original: monthPrice, suffix: '/mo',   label: `${listing.name} (monthly)` },
+      meal:    { price: mealDisc.discounted,  label: `${listing.name} (per meal)` },
+      week:    { price: weekDisc.discounted,  label: `${listing.name} (weekly)` },
+      monthly: { price: monthDisc.discounted, label: `${listing.name} (monthly)` },
     };
     const c = map[type];
-    addItem({
-      id: c.id, listingId: id, vendorId: listing.user_id,
-      vendorName: vendor?.full_name || 'Vendor',
-      name: c.label, originalPrice: c.original, price: c.price,
-      discountPct: isPro ? 15 : 0, type: 'tiffin', suffix: c.suffix,
-    });
+    setOrderPlan({ name: c.label, price: c.price ?? null });
   }
 
   function handleReviewSubmitted() {
@@ -392,6 +394,17 @@ export default function VendorDetailPage() {
             <XIcon />
           </button>
         </div>
+      )}
+
+      {/* Quick order — quantity, time, address. No cart, no payment. */}
+      {orderPlan && (
+        <QuickOrderModal
+          listingId={id}
+          vendorId={listing.user_id}
+          itemName={orderPlan.name}
+          pricePerMeal={orderPlan.price}
+          onClose={() => setOrderPlan(null)}
+        />
       )}
 
       {/* Review modal */}
@@ -553,7 +566,7 @@ export default function VendorDetailPage() {
                 title="Per Meal" price={mealDisc.discounted} originalPrice={mealPrice}
                 suffix="/meal" desc="Order individual meals as needed — great for trying it out."
                 discPct={isPro ? 15 : 0} savings={mealPrice - mealDisc.discounted}
-                inCart={hasItem(cartIdMeal)} onAdd={() => addToCart('meal')}
+                inCart={hasItem(cartIdMeal)} onAdd={() => openOrder('meal')}
                 onView={() => router.push('/student/cart')} isPro={isPro}
               />
             )}
@@ -563,7 +576,7 @@ export default function VendorDetailPage() {
                 title="Weekly Plan" price={weekDisc.discounted} originalPrice={weekPrice}
                 suffix="/week" desc="Full week of meals delivered daily. Flexible and easy."
                 discPct={isPro ? 15 : 0} savings={weekPrice - weekDisc.discounted}
-                inCart={hasItem(cartIdWeek)} onAdd={() => addToCart('week')}
+                inCart={hasItem(cartIdWeek)} onAdd={() => openOrder('week')}
                 onView={() => router.push('/student/cart')} isPro={isPro}
               />
             )}
@@ -575,7 +588,7 @@ export default function VendorDetailPage() {
                 suffix="/month"
                 desc={mealPrice > 0 ? `≈ $${(monthDisc.discounted / 30).toFixed(2)}/day · Unlimited daily meals` : 'Full month of home-cooked meals.'}
                 discPct={isPro ? 15 : 0} savings={monthPrice - monthDisc.discounted}
-                inCart={hasItem(cartIdMonth)} onAdd={() => addToCart('monthly')}
+                inCart={hasItem(cartIdMonth)} onAdd={() => openOrder('monthly')}
                 onView={() => router.push('/student/cart')} isPro={isPro}
               />
             )}

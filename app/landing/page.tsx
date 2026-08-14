@@ -177,6 +177,7 @@ export default function LandingPage() {
             ['💚','Campus Connect','University-locked matching to meet students.'],
             ['📚','Marketplace','Buy and sell textbooks and dorm items.'],
             ['💬','Community','Ask questions and get campus answers fast.'],
+            ['🍱','Homemade Food','Order tiffins and home-cooked meals nearby.'],
             ['🎉','Events','See what’s on and RSVP in one tap.'],
             ['⭐','Find Your People','Study buddies, gym partners, teammates.'],
             ['✉️','Messaging','Chat directly with any student.'],
@@ -193,7 +194,7 @@ export default function LandingPage() {
         {/* What's next — compact chips, not a tall list */}
         <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
           <span style={{ fontSize:10.5, fontWeight:800, letterSpacing:2, textTransform:'uppercase', color:'#7C6BD1', background:'rgba(124,107,209,0.10)', border:'1px solid rgba(124,107,209,0.22)', borderRadius:100, padding:'6px 13px' }}>What&apos;s Next</span>
-          {['🍱 Homemade Food','🚗 Airport Pickup','💼 Student Jobs','🧹 Student Services','🎓 Tutoring'].map(f => (
+          {['🚗 Airport Pickup','💼 Student Jobs','🧹 Student Services','🎓 Tutoring'].map(f => (
             <span key={f} style={{ display:'inline-flex', alignItems:'center', gap:6, background:'#ffffff', border:'1px solid var(--border)', borderRadius:100, padding:'8px 15px', fontSize:13.5, fontWeight:600, color:'var(--muted)' }}>{f}</span>
           ))}
         </div>

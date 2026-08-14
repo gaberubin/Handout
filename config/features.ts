@@ -75,7 +75,10 @@ export const COMING_SOON: Record<string, { title: string; emoji: string; blurb: 
 // /coming-soon?feature=<key> while BETA_MODE is on. The page itself is never
 // deleted — it simply isn't reachable during the beta.
 const GATED_ROUTES: { prefix: string; feature: string }[] = [
-  { prefix: '/student/food',       feature: 'food' },
+  // Food is LIVE for students in the beta: vendors list tiffins from
+  // /vendor/menu and students order directly (quantity / time / address, no
+  // payment). Re-add this line to hide it again.
+  // { prefix: '/student/food',       feature: 'food' },
   { prefix: '/student/services',   feature: 'services' },
   { prefix: '/student/welcome',    feature: 'airport_pickup' },
   { prefix: '/student/membership', feature: 'premium' },
@@ -107,7 +110,7 @@ export function isComingSoon(feature: string): boolean {
 // NOTE: "Housing" is intentionally excluded — Roommates already covers this
 // in the live Beta, so a separate coming-soon tile for it would be confusing.
 export const COMING_SOON_NAV: { feature: string; label: string }[] = [
-  { feature: 'food',           label: 'Homemade Food' },
+  // 'food' moved OUT of What's Next — Homemade Food is live in the beta.
   { feature: 'airport_pickup', label: 'Airport Pickup' },
   { feature: 'jobs',           label: 'Student Jobs' },
   { feature: 'services',       label: 'Student Services' },

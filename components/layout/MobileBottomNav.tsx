@@ -43,6 +43,7 @@ const StarIcon = () => (
 const MORE_LINKS = [
   { href: '/student/dating',           emoji: '💚', label: 'Campus Connect' },
   { href: '/student/community?tab=market', emoji: '📚', label: 'Marketplace' },
+  { href: '/student/food',             emoji: '🍱', label: 'Homemade Food' },
   { href: '/student/events',           emoji: '🎉', label: 'Events' },
   { href: '/student/find-people',      emoji: '⭐', label: 'Find Your People' },
   { href: '/student/rewards',          emoji: '🏆', label: 'Rewards' },

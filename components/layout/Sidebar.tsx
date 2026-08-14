@@ -45,6 +45,7 @@ const betaNav = [
   { href: '/student/dating',          icon: <DatingIcon />,    label: 'Campus Connect' },
   { href: '/student/community',       icon: <CommunityIcon />, label: 'Community' },
   { href: '/student/community?tab=market', icon: <MarketIcon />, label: 'Marketplace' },
+  { href: '/student/food',            icon: <FoodIcon />,      label: 'Homemade Food' },
   { href: '/student/events',          icon: <EventIcon />,     label: 'Events' },
   { href: '/student/find-people',     icon: <PeopleIcon />,    label: 'Find Your People' },
   { href: '/student/messages',        icon: <MessagesIcon />,  label: 'Messages' },
