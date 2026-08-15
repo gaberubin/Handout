@@ -56,7 +56,6 @@ const betaNav = [
 // NOTE: "Housing" is intentionally excluded — Roommates already covers this
 // in the live Beta, so a separate coming-soon tile for it would be confusing.
 const comingSoonNav = [
-  { href: '/coming-soon?feature=food',           icon: <FoodIcon />,     label: 'Homemade Food',   badge: 'SOON' },
   { href: '/coming-soon?feature=airport_pickup', icon: <PlaneIcon />,    label: 'Airport Pickup',  badge: 'SOON' },
   { href: '/coming-soon?feature=jobs',           icon: <JobsIcon />,     label: 'Student Jobs',    badge: 'SOON' },
   { href: '/coming-soon?feature=services',       icon: <ServicesIcon />, label: 'Student Services',badge: 'SOON' },
