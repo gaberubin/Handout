@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { StudentLayout } from '@/components/layout/StudentLayout';
 import { createClient } from '@/lib/supabase/client';
+import { QuickOrderModal } from '@/components/food/QuickOrderModal';
 
 const CheckIcon = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
 const StarIcon  = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
@@ -15,6 +16,8 @@ export default function FoodPage() {
   const [listings, setListings] = useState<any[]>([]);
   const [cuisine, setCuisine] = useState('All');
   const [search, setSearch]   = useState('');
+  // Order straight from the card — no need to open the detail page first.
+  const [orderFor, setOrderFor] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
@@ -39,6 +42,15 @@ export default function FoodPage() {
 
   return (
     <StudentLayout title="Food & Tiffin">
+      {orderFor && (
+        <QuickOrderModal
+          listingId={orderFor.id}
+          vendorId={orderFor.user_id}
+          itemName={orderFor.name}
+          pricePerMeal={orderFor.price_per_meal ?? null}
+          onClose={() => setOrderFor(null)}
+        />
+      )}
       <div className="page-enter" style={{ maxWidth: 1100, margin: '0 auto' }}>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
@@ -72,7 +84,8 @@ export default function FoodPage() {
         ) : (
           <div className="stagger-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(285px,1fr))', gap: 16 }}>
             {visible.map((l, i) => (
-              <div key={l.id} className="ft-card" style={{ overflow: 'hidden' }}>
+              <Link key={l.id} href={`/student/food/${l.id}`} className="ft-card"
+                style={{ overflow: 'hidden', display: 'block', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
                 <div style={{ height: 96, background: BG_COLORS[i % BG_COLORS.length], display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 42 }}>
                   {l.emoji || '🍱'}
                 </div>
@@ -102,10 +115,14 @@ export default function FoodPage() {
                       <span className="ft-num" style={{ fontSize: 18, color: '#12241C' }}>${l.price_per_meal}</span>
                       <span style={{ fontSize: 11, color: '#7d9188' }}> / meal · ${l.price_per_month || (l.price_per_meal * 18)}/mo</span>
                     </div>
-                    <Link href={`/student/food/${l.id}`} className="ft-btn ft-btn-p" style={{ fontSize: 12, padding: '8px 16px' }}>Subscribe</Link>
+                    <button
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); setOrderFor(l); }}
+                      className="ft-btn ft-btn-p" style={{ fontSize: 12, padding: '8px 16px', cursor: 'pointer' }}>
+                      Order now
+                    </button>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

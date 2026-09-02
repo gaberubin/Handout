@@ -26,11 +26,12 @@ const LBL: React.CSSProperties = {
   marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4,
 };
 
-const TIMES = ['Breakfast (8–9 AM)', 'Lunch (12–1 PM)', 'Evening (5–6 PM)', 'Dinner (8–9 PM)'];
+// Keep it loose — the cook and student agree the exact time when she calls.
+const TIMES = ['Lunch', 'Dinner'];
 
 export function QuickOrderModal({ listingId, vendorId, itemName, pricePerMeal, onClose }: Props) {
   const [qty, setQty]         = useState(1);
-  const [time, setTime]       = useState(TIMES[1]);
+  const [time, setTime]       = useState(TIMES[0]);
   const [address, setAddress] = useState('');
   const [notes, setNotes]     = useState('');
   const [busy, setBusy]       = useState(false);
@@ -76,11 +77,13 @@ export function QuickOrderModal({ listingId, vendorId, itemName, pricePerMeal, o
         {done ? (
           <div style={{ textAlign:'center', padding:'12px 4px' }}>
             <div style={{ fontSize:38, marginBottom:10 }}>✅</div>
-            <h3 style={{ fontSize:19, fontWeight:800, color:'#12241C', margin:'0 0 8px' }}>Order placed</h3>
-            <p style={{ fontSize:13.5, color:'#4c6157', lineHeight:1.6, margin:'0 0 18px' }}>
-              {itemName} — <strong>{qty} tiffin{qty > 1 ? 's' : ''}</strong> for {time}.<br />
-              The cook has been notified and will contact you to confirm.
+            <h3 style={{ fontSize:19, fontWeight:800, color:'#12241C', margin:'0 0 8px' }}>Request sent 🎉</h3>
+            <p style={{ fontSize:13.5, color:'#4c6157', lineHeight:1.6, margin:'0 0 14px' }}>
+              {itemName} — <strong>{qty} tiffin{qty > 1 ? 's' : ''}</strong> for {time}.
             </p>
+            <div style={{ padding:'12px 14px', borderRadius:12, background:'rgba(18,161,80,0.07)', border:'1px solid rgba(18,161,80,0.22)', fontSize:13.5, color:'#12241C', lineHeight:1.6, marginBottom:18 }}>
+              <strong>The cook will reach out to you soon</strong> to confirm your order and arrange payment directly.
+            </div>
             <button onClick={onClose} className="ft-btn ft-btn-p" style={{ padding:'11px 24px' }}>Done</button>
           </div>
         ) : (
@@ -108,7 +111,7 @@ export function QuickOrderModal({ listingId, vendorId, itemName, pricePerMeal, o
 
               {/* Time */}
               <div>
-                <label style={LBL}>What time?</label>
+                <label style={LBL}>Lunch or dinner?</label>
                 <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
                   {TIMES.map(t => (
                     <button key={t} type="button" onClick={() => setTime(t)}
@@ -139,7 +142,7 @@ export function QuickOrderModal({ listingId, vendorId, itemName, pricePerMeal, o
             </div>
 
             <div style={{ marginTop:16, padding:'10px 13px', borderRadius:10, background:'rgba(37,99,235,0.05)', border:'1px solid rgba(37,99,235,0.15)', fontSize:12.5, color:'#4C6157', lineHeight:1.5 }}>
-              Handout doesn’t take payment — you’ll pay the cook directly. They’ll contact you to confirm.
+              Handout doesn’t handle payment — we just connect you. The cook will contact you to confirm and arrange payment directly.
             </div>
 
             {err && <div style={{ marginTop:12, padding:'10px 14px', borderRadius:10, background:'rgba(194,91,78,0.10)', border:'1px solid rgba(194,91,78,0.3)', color:'#C25B4E', fontSize:13 }}>{err}</div>}
