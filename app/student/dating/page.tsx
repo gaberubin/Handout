@@ -189,7 +189,7 @@ function SetupModal({ me, onSave }: { me:Me; onSave:(p:DProfile)=>void }) {
   const [saveErr,   setSaveErr]   = useState('');
 
   const toggleI = (i:string) => setInterests(p=>p.includes(i)?p.filter(x=>x!==i):p.length<6?[...p,i]:p);
-  const canNext  = step===0 ? (!!name && !!age && parseInt(age)>=16 && parseInt(age)<=100 && !!gender) : true;
+  const canNext  = step===0 ? (!!name && !!age && parseInt(age)>=18 && parseInt(age)<=100 && !!gender) : true;
 
   const save = async () => {
     if (!name||!age||!gender) return;
@@ -228,7 +228,7 @@ function SetupModal({ me, onSave }: { me:Me; onSave:(p:DProfile)=>void }) {
               <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your first name" style={INP}/></div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
               <div><label style={{ fontSize:12, color:'var(--muted)', display:'block', marginBottom:6 }}>Your age</label>
-                <input type="number" min={16} max={100} value={age} onChange={e=>setAge(e.target.value)} placeholder="21" style={INP}/></div>
+                <input type="number" min={18} max={100} value={age} onChange={e=>setAge(e.target.value)} placeholder="21" style={INP}/></div>
               <div><label style={{ fontSize:12, color:'var(--muted)', display:'block', marginBottom:6 }}>Height <span style={{ color:'#9aa8a0' }}>(cm, optional)</span></label>
                 <input type="number" value={height} onChange={e=>setHeight(e.target.value)} placeholder="170" style={INP}/></div>
             </div>
