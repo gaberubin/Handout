@@ -91,7 +91,8 @@ function PhotoGrid({ photos, userId, onChange }: { photos:string[]; userId:strin
     setUploading(idx); setErr('');
     const jpeg = await prepareImageUpload(f).catch((x:Error) => { setErr(x.message); return null; });
     if (!jpeg) { setUploading(null); return; }
-    try { const url = await uploadPhoto(jpeg, userId); const next=[...photos]; next[idx]=url; onChange(next); } catch {}
+    try { const url = await uploadPhoto(jpeg, userId); const next=[...photos]; next[idx]=url; onChange(next); }
+    catch { setErr('Photo upload failed — please try again.'); }
     setUploading(null);
   };
   const remove = (idx:number) => { const next=[...photos]; next.splice(idx,1); onChange(next); };
@@ -189,14 +190,14 @@ function SetupModal({ me, onSave }: { me:Me; onSave:(p:DProfile)=>void }) {
   const [saveErr,   setSaveErr]   = useState('');
 
   const toggleI = (i:string) => setInterests(p=>p.includes(i)?p.filter(x=>x!==i):p.length<6?[...p,i]:p);
-  const canNext  = step===0 ? (!!name && !!age && parseInt(age)>=18 && parseInt(age)<=100 && !!gender) : true;
+  const canNext  = step===0 ? (!!name && !!age && parseInt(age)>=18 && parseInt(age)<=60 && !!gender) : true;
 
   const save = async () => {
     if (!name||!age||!gender) return;
     // Validate name (letters/numbers), age range, and bio length
     const nErr = validateText(name, 'Name', { min: 2, max: 40 });
     const aNum = parseInt(age);
-    const aErr = (!aNum || aNum < 18 || aNum > 99) ? 'Age must be between 18 and 99' : '';
+    const aErr = (!aNum || aNum < 18 || aNum > 60) ? 'Age must be between 18 and 60' : '';
     const bErr = validateParagraph(bio, 'Bio', { max: 500 });
     if (nErr || aErr || bErr) { setSaveErr(nErr || aErr || bErr); return; }
     setSaving(true); setSaveErr('');
@@ -228,7 +229,7 @@ function SetupModal({ me, onSave }: { me:Me; onSave:(p:DProfile)=>void }) {
               <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your first name" style={INP}/></div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
               <div><label style={{ fontSize:12, color:'var(--muted)', display:'block', marginBottom:6 }}>Your age</label>
-                <input type="number" min={18} max={100} value={age} onChange={e=>setAge(e.target.value)} placeholder="21" style={INP}/></div>
+                <input type="number" min={18} max={60} value={age} onChange={e=>setAge(e.target.value)} placeholder="21" style={INP}/></div>
               <div><label style={{ fontSize:12, color:'var(--muted)', display:'block', marginBottom:6 }}>Height <span style={{ color:'#9aa8a0' }}>(cm, optional)</span></label>
                 <input type="number" value={height} onChange={e=>setHeight(e.target.value)} placeholder="170" style={INP}/></div>
             </div>
