@@ -79,7 +79,7 @@ export default function Browse() {
     })();
   }, []);
 
-  const tabs: { key: Tab; label: string; Icon: () => JSX.Element }[] = [
+  const tabs: { key: Tab; label: string; Icon: () => React.JSX.Element }[] = [
     { key: 'all',       label: 'All',           Icon: AllBrIcon    },
     { key: 'roommates', label: 'Roommates',      Icon: PeopleBrIcon },
     { key: 'food',      label: 'Tiffin / Food',  Icon: FoodBrIcon   },
