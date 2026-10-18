@@ -149,7 +149,7 @@ export default function StudentProfile() {
     if (!confirm('Delete your account permanently? All data will be removed. This cannot be undone.')) return;
     setDeleting(true); setErr('');
     const res = await deleteAccountAction();
-    if ('error' in res) { setErr(res.error); setDeleting(false); return; }
+    if (res.error) { setErr(res.error); setDeleting(false); return; }
     window.location.href = '/';
   }
 

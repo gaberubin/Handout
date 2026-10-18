@@ -109,7 +109,7 @@ export default function StudentSettingsPage() {
     if (!confirm('Delete your account permanently? This cannot be undone.')) return;
     setDeleting(true);
     const res = await deleteAccountAction();
-    if ('error' in res) { setDeleting(false); alert(res.error); return; }
+    if (res.error) { setDeleting(false); alert(res.error); return; }
     window.location.href = '/';
   }
 
