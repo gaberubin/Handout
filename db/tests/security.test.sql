@@ -158,6 +158,15 @@ SELECT test.denied(:'case', $$UPDATE public.users SET email = 'admin2@uni.edu' W
 SELECT 'PASS: ' || :'case';
 ROLLBACK;
 
+\set case 'C1 provider can become vendor but not student'
+BEGIN;
+UPDATE public.users SET role = 'provider' WHERE id = test.uid('carol');
+SELECT test.as_user('carol');
+SELECT test.denied(:'case', $$UPDATE public.users SET role = 'student' WHERE id = auth.uid()$$);
+SELECT test.rows(:'case', $$UPDATE public.users SET role = 'vendor', full_name = 'Carol C' WHERE id = auth.uid()$$, 1);
+SELECT 'PASS: ' || :'case';
+ROLLBACK;
+
 \set case 'C1 student can become vendor'
 BEGIN;
 SELECT test.as_user('alice');
@@ -560,6 +569,20 @@ SELECT test.as_anon();
 SELECT test.eq(:'case', (SELECT count(*) FROM public.dating_profiles), 0::bigint);
 SELECT test.denied(:'case', format($$INSERT INTO public.messages (sender_id, receiver_id, content)
   VALUES (%L, %L, 'anon')$$, test.uid('carol'), test.uid('dan')));
+SELECT 'PASS: ' || :'case';
+ROLLBACK;
+
+-- ════════════════════ C6 — account deletion ══════════════════════════════
+\set case 'C6 deleting the auth user removes the members rows'
+BEGIN;
+SELECT test.as_user('alice');
+SELECT test.rows(:'case', format($$INSERT INTO public.messages (sender_id, receiver_id, content)
+  VALUES (auth.uid(), %L, 'hi')$$, test.uid('carol')), 1);
+RESET ROLE;
+SELECT test.rows(:'case', format($$DELETE FROM auth.users WHERE id = %L$$, test.uid('alice')), 1);
+SELECT test.eq(:'case', (SELECT count(*) FROM public.users WHERE id = test.uid('alice')), 0::bigint);
+SELECT test.eq(:'case', (SELECT count(*) FROM public.dating_profiles WHERE user_id = test.uid('alice')), 0::bigint);
+SELECT test.eq(:'case', (SELECT count(*) FROM public.messages WHERE sender_id = test.uid('alice')), 0::bigint);
 SELECT 'PASS: ' || :'case';
 ROLLBACK;
 

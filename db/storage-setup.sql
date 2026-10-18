@@ -15,7 +15,7 @@ DO $$ BEGIN
   BEGIN CREATE POLICY "listing media read" ON storage.objects
     FOR SELECT USING (bucket_id = 'listing-media');
   EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'lm read skipped: %', SQLERRM; END;
-  -- a user can upload only into their OWN folder ( <uid>/... ); replaces the older any-path policy
+  -- a user can upload only into their OWN folder ( <uid>/... )
   BEGIN DROP POLICY IF EXISTS "listing media upload" ON storage.objects;
     CREATE POLICY "listing media upload" ON storage.objects
     FOR INSERT TO authenticated

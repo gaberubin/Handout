@@ -194,7 +194,7 @@ GRANT UPDATE (full_name, phone, avatar_url, gender, city, address, onboarded, co
               role, verification_status, is_verified) ON public.users TO authenticated;
 GRANT INSERT (id, email, full_name, role) ON public.users TO authenticated;
 
--- members: student → vendor and → 'pending' only; admins and server-side code: anything
+-- members: student/provider → vendor and → 'pending' only; admins and server-side code: anything
 CREATE OR REPLACE FUNCTION public.users_guard_transitions()
 RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
 BEGIN
@@ -208,7 +208,7 @@ BEGIN
     RETURN NEW;
   END IF;
   IF NEW.role IS DISTINCT FROM OLD.role
-     AND NOT (OLD.role::text = 'student' AND NEW.role::text = 'vendor') THEN
+     AND NOT (OLD.role::text IN ('student', 'provider') AND NEW.role::text = 'vendor') THEN
     RAISE EXCEPTION 'Only an admin can make this role change.' USING ERRCODE = 'insufficient_privilege';
   END IF;
   IF NEW.verification_status IS DISTINCT FROM OLD.verification_status
@@ -241,8 +241,8 @@ ALTER TABLE public.verifications     ENABLE ROW LEVEL SECURITY;
 -- users: own row only (others via public_profiles); write own row; admin all. No self-delete (runs server-side).
 CREATE POLICY users_read       ON public.users FOR SELECT TO authenticated USING (auth.uid() = id OR public.is_admin());
 CREATE POLICY users_insert     ON public.users FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = id AND role IN ('student', 'vendor', 'provider') AND lower(email) = lower(auth.jwt() ->> 'email'));
-CREATE POLICY users_update_own ON public.users FOR UPDATE USING (auth.uid() = id);
+  WITH CHECK (auth.uid() = id AND role::text IN ('student', 'vendor', 'provider') AND lower(email) = lower(auth.jwt() ->> 'email'));
+CREATE POLICY users_update_own ON public.users FOR UPDATE TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 CREATE POLICY users_admin_all  ON public.users FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 -- profiles

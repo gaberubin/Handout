@@ -8,7 +8,7 @@
 -- What it changes (no tables dropped, no rows changed except bucket limits):
 --   1. public.users writes — members may edit only their own profile columns;
 --      role / verification_status / is_verified changes are checked by a
---      trigger (members: student → vendor and → 'pending' only; admins and
+--      trigger (members: student/provider → vendor and → 'pending' only; admins and
 --      server-side code: anything). Own-row inserts are limited to
 --      student/vendor/provider with the account's own email. Members can no
 --      longer delete their users row (account deletion runs server-side).
@@ -106,7 +106,7 @@ BEGIN
     RETURN NEW;
   END IF;
   IF NEW.role IS DISTINCT FROM OLD.role
-     AND NOT (OLD.role::text = 'student' AND NEW.role::text = 'vendor') THEN
+     AND NOT (OLD.role::text IN ('student', 'provider') AND NEW.role::text = 'vendor') THEN
     RAISE EXCEPTION 'Only an admin can make this role change.' USING ERRCODE = 'insufficient_privilege';
   END IF;
   IF NEW.verification_status IS DISTINCT FROM OLD.verification_status
