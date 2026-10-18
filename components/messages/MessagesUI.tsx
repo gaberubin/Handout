@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { sendMessageAction } from '@/lib/actions/auth';
 import { awardPoints } from '@/lib/points';
+import { publicStorageUrl } from '@/lib/storageUrl';
 import { prepareImageUpload } from '@/lib/imageCompress';
 
 // Re-encoded before upload to strip EXIF/GPS; GIFs are left alone so they stay animated.
@@ -97,15 +98,18 @@ function MessageContent({ content, mine }: { content: string; mine: boolean }) {
   const imgPattern = /\[📎 ([^\]]+\.(png|jpg|jpeg|gif|webp))\]\(([^)]+)\)/i;
   const filePattern = /\[📎 ([^\]]+)\]\(([^)]+)\)/;
   const simplePattern = /\[📎 ([^\]]+)\]/;
+  const plain = <span style={{ wordBreak: 'break-word' }}>{content}</span>;
 
   const imgMatch = content.match(imgPattern);
   if (imgMatch) {
     const [full, name, , url] = imgMatch;
+    const src = publicStorageUrl(url, 'message-attachments');
+    if (!src) return plain;
     const pre = content.slice(0, content.indexOf(full)).trim();
     return (
       <div>
         {pre && <p style={{ margin: '0 0 8px', wordBreak: 'break-word' }}>{pre}</p>}
-        <img src={url} alt={name} style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8, display: 'block' }} />
+        <img src={src} alt={name} style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8, display: 'block' }} />
         <div style={{ fontSize: 11, marginTop: 4, opacity: 0.65 }}>📎 {name}</div>
       </div>
     );
@@ -114,11 +118,13 @@ function MessageContent({ content, mine }: { content: string; mine: boolean }) {
   const fileMatch = content.match(filePattern);
   if (fileMatch) {
     const [full, name, url] = fileMatch;
+    const href = publicStorageUrl(url, 'message-attachments');
+    if (!href) return plain;
     const pre = content.slice(0, content.indexOf(full)).trim();
     return (
       <div>
         {pre && <p style={{ margin: '0 0 8px', wordBreak: 'break-word' }}>{pre}</p>}
-        <a href={url} target="_blank" rel="noreferrer" style={{
+        <a href={href} target="_blank" rel="noopener noreferrer" style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '7px 11px', borderRadius: 8,
           background: mine ? 'rgba(0,0,0,0.15)' : 'rgba(18,36,28,0.09)',
@@ -145,7 +151,7 @@ function MessageContent({ content, mine }: { content: string; mine: boolean }) {
     );
   }
 
-  return <span style={{ wordBreak: 'break-word' }}>{content}</span>;
+  return plain;
 }
 
 /* ══════════════════════════════════════════════════════════════
