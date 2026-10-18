@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { sendMessageAction } from '@/lib/actions/auth';
 import { awardPoints } from '@/lib/points';
+import { prepareImageUpload } from '@/lib/imageCompress';
+
+// Re-encoded before upload to strip EXIF/GPS; GIFs are left alone so they stay animated.
+const REENCODE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
 /* ── MessagesUI icon set ── */
 const SvcMsgIcon  = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>;
@@ -585,23 +589,28 @@ export function MessagesUI({ meId }: { meId: string }) {
 
     if (pendingFile) {
       setUploading(true);
+      let file = pendingFile;
+      if (REENCODE_TYPES.includes(file.type)) {
+        try { file = await prepareImageUpload(file); }
+        catch (e) { setUploading(false); alert((e as Error).message); return; }
+      }
       try {
         const supabase = createClient();
-        const ext = pendingFile.name.split('.').pop() || 'bin';
+        const ext = file.name.split('.').pop() || 'bin';
         const path = `${meId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
         const { data: upData, error: upErr } = await supabase.storage
           .from('message-attachments')
-          .upload(path, pendingFile, { upsert: false });
+          .upload(path, file, { upsert: false });
         if (!upErr && upData) {
           const { data: urlData } = supabase.storage.from('message-attachments').getPublicUrl(path);
-          const tag = `[📎 ${pendingFile.name}](${urlData.publicUrl})`;
+          const tag = `[📎 ${file.name}](${urlData.publicUrl})`;
           content = content ? `${content}\n${tag}` : tag;
         } else {
-          const tag = `[📎 ${pendingFile.name}]`;
+          const tag = `[📎 ${file.name}]`;
           content = content ? `${content}\n${tag}` : tag;
         }
       } catch {
-        const tag = `[📎 ${pendingFile.name}]`;
+        const tag = `[📎 ${file.name}]`;
         content = content ? `${content}\n${tag}` : tag;
       }
       setUploading(false);
