@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { StudentLayout } from '@/components/layout/StudentLayout';
 import { createClient } from '@/lib/supabase/client';
+import { deleteAccountAction } from '@/lib/actions/account';
 import { prepareImageUpload } from '@/lib/imageCompress';
 import { validateName, validatePhone } from '@/lib/validation';
 import { UniversitySelect } from '@/components/ui/UniversitySelect';
@@ -62,6 +63,7 @@ export default function StudentProfile() {
   const [err, setErr] = useState('');
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const initials = (fullName || email || '?').split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
@@ -145,13 +147,9 @@ export default function StudentProfile() {
 
   async function deleteAccount() {
     if (!confirm('Delete your account permanently? All data will be removed. This cannot be undone.')) return;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from('roommate_listings').delete().eq('user_id', user.id);
-    await supabase.from('student_profiles').delete().eq('user_id', user.id);
-    await supabase.from('users').delete().eq('id', user.id);
-    await supabase.auth.signOut();
+    setDeleting(true); setErr('');
+    const res = await deleteAccountAction();
+    if ('error' in res) { setErr(res.error); setDeleting(false); return; }
     window.location.href = '/';
   }
 
@@ -325,9 +323,9 @@ export default function StudentProfile() {
               <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14, lineHeight: 1.5 }}>
                 Permanently delete your account, profile, and all listings. This cannot be undone.
               </p>
-              <button onClick={deleteAccount}
+              <button onClick={deleteAccount} disabled={deleting}
                 style={{ height: 42, padding: '0 20px', background: 'rgba(220,38,38,0.12)', color: '#C25B4E', border: '1px solid rgba(220,38,38,0.3)', borderRadius: 100, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-                Delete my account
+                {deleting ? 'Deleting…' : 'Delete my account'}
               </button>
             </div>
 
