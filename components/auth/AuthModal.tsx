@@ -87,11 +87,11 @@ export function AuthModal({
 
       if (data.session) {
         // Email confirmation is OFF in Supabase — user is in directly
-        // Profile update needs a session (RLS: auth.uid() = id); best-effort, so report but don't block.
+        // Profile update needs a session (RLS: auth.uid() = id). onSuccess navigates away, so report via alert.
         const { error: profileErr } = await supabase.from('users').update({ full_name: name.trim(), phone, role }).eq('id', data.user.id);
         if (profileErr) {
           console.error('Profile update after sign-up failed:', profileErr);
-          setError('Account created, but we could not save your profile details. You can update them in your profile.');
+          alert('Your account was created, but we could not save your profile details. You can update them in your profile.');
         }
         onSuccess(data.user);
       } else {
